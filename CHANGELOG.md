@@ -10,6 +10,7 @@ See [keep a changelog] for information about writing changes to this log.
 
 ### Added
 
+- Data model.
 - Symfony core.
 
 [keep a changelog]: https://keepachangelog.com/en/1.1.0/

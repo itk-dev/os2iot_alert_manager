@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a3481c885a17ee5ae2428df4f0e13637",
+    "content-hash": "b4510f573302a54d859192a666206c30",
     "packages": [
         {
             "name": "itk-dev/metrics-bundle",
@@ -5557,7 +5557,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "ext-ctype": "*",
         "ext-iconv": "*"
     },
