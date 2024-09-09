@@ -15,6 +15,7 @@ final readonly class Device
         public Application $application,
         public Message $latestReceivedMessage,
         public float $statusBattery,
+        public array $metadata,
     ) {
     }
 }

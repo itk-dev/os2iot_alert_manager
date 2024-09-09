@@ -38,9 +38,13 @@ class ApiApplicationsCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $arg1 = $input->getArgument('arg1');
 
-        $this->apiClient->getApplications();
+        $apps = $this->apiClient->getApplications();
 
-        $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        foreach ($apps as $app) {
+            $io->writeln('<info>'.$app->name.'</info>');
+        }
+
+        $io->success(count($apps) . ' applications found');
 
         return Command::SUCCESS;
     }

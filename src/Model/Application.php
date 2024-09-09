@@ -8,16 +8,16 @@ final readonly class Application
 {
     public function __construct(
         public int $id,
-        public \DateTime $createdAt,
-        public \DateTime $updatedAt,
-        public \DateTime $startDate,
-        public \DateTime $endDate,
+        public \DateTimeImmutable $createdAt,
+        public \DateTimeImmutable $updatedAt,
+        public ?\DateTimeImmutable $startDate,
+        public ?\DateTimeImmutable $endDate,
         public string $name,
         public Status $status,
-        public string $contactPerson,
-        public string $contactEmail,
-        public string $contactPhone,
-        /** @var array<string> */
+        public ?string $contactPerson,
+        public ?string $contactEmail,
+        public ?string $contactPhone,
+        /** @var array<int> */
         public array $devices,
     ) {
     }
