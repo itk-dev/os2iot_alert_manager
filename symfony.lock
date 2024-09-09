@@ -11,6 +11,9 @@
             ".php-cs-fixer.dist.php"
         ]
     },
+    "itk-dev/metrics-bundle": {
+        "version": "1.1.0"
+    },
     "symfony/console": {
         "version": "7.1",
         "recipe": {

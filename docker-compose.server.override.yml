@@ -1,0 +1,7 @@
+services:
+  redis:
+    image: 'redis:6'
+    networks:
+      - app
+    ports:
+      - '6379'
