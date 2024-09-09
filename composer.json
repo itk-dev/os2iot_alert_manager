@@ -9,11 +9,13 @@
         "php": ">=8.3",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "cerbero/json-parser": "^1.1",
         "itk-dev/metrics-bundle": "^1.1",
         "symfony/console": "7.1.*",
         "symfony/dotenv": "7.1.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.1.*",
+        "symfony/http-client": "7.1.*",
         "symfony/runtime": "7.1.*",
         "symfony/yaml": "7.1.*"
     },
