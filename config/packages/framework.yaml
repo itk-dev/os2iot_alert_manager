@@ -19,10 +19,12 @@ framework:
 
             sms.client:
                 base_uri: '%env(resolve:SMS_URL)%'
+                max_redirects: 5
+                retry_failed: { max_retries: 3 }
                 headers:
                     Accept: 'application/json'
                     ContentType: 'application/json'
-                    auth_bearer: '%env(string:SMS_GATEWAY_TOKEN)%'
+                    Authorization: 'Bearer %env(string:SMS_GATEWAY_TOKEN)%'
 
 
 when@test:
