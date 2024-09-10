@@ -7,6 +7,8 @@ enum Status: string
     case NONE = 'NONE';
     case IN_OPERATION = 'IN-OPERATION';
     case PROTOTYPE = 'PROTOTYPE';
+    case PROJECT = 'PROJECT';
+    case OTHER = 'OTHER';
 
     public static function array(): array
     {
