@@ -10,6 +10,7 @@ See [keep a changelog] for information about writing changes to this log.
 
 ### Added
 
+- Metrics bundlen added.
 - Data model.
 - Symfony core.
 

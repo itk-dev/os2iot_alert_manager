@@ -22,3 +22,14 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Service\ApiParser:
+        arguments:
+            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
+            $fromTimeZone: '%env(string:API_ORIGINAL_TIMEZONE)%'
+            $timezone: '%env(string:API_TO_TIMEZONE)%'
+            $timeformat: '%env(string:API_DATE_FORMAT)%'
+
+    App\Command\ApiApplicationsCommand:
+        arguments:
+            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
+
