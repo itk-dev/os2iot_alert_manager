@@ -4,7 +4,11 @@ namespace App\Service;
 
 use App\Exception\ParsingExecption;
 use App\Model\Application;
+use App\Model\DataTypes\Location;
+use App\Model\DataTypes\Message;
+use App\Model\DataTypes\ReceivedInfo;
 use App\Model\DataTypes\Status;
+use App\Model\Device;
 use Cerbero\JsonParser\JsonParser;
 use ItkDev\MetricsBundle\Service\MetricsService;
 
@@ -21,10 +25,15 @@ final readonly class ApiParser
     }
 
     /**
+     * Get applications.
+     *
      * @param string $content
+     *   Application data from the API.
      * @param bool $filterOnStatus
+     *   Should we filter on the configured status.
      *
      * @return Array<Application>
+     *   All found applications.
      *
      * @throws ParsingExecption
      * @throws \DateInvalidTimeZoneException
@@ -68,9 +77,107 @@ final readonly class ApiParser
     }
 
     /**
-     * Parse date into DateTime object.
+     * Parse a single device's information.
      *
-     * @TODO: move date format etc. into configuration.
+     * @param string $content
+     *   The device information from the API.
+     *
+     * @return Device
+     *   Parsed device information object.
+     *
+     * @throws ParsingExecption
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     */
+    public function device(string $content): Device
+    {
+        $parse = new JsonParser($content);
+        $data = $parse->toArray();
+
+        return new Device(
+            id: $data['id'],
+            createdAt: $this->parseDate($data['createdAt']),
+            updatedAt: $this->parseDate($data['createdAt']),
+            name: $data['id'],
+            location: $this->parseLocation($data['location']),
+            latestReceivedMessage: $this->parseMessage($data['latestReceivedMessage']),
+            statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
+            // @todo: Parse metatdata when exsamples sesor is given.
+            metadata: []//$data['metadata'],
+        );
+    }
+
+    /**
+     * Parse location information.
+     *
+     * @param array $data
+     *   Raw location data from the API.
+     *
+     * @return Location
+     *  Location object.
+     */
+    private function parseLocation(array $data): Location
+    {
+        return new Location(
+            latitude: end($data['coordinates']),
+            longitude: reset($data['coordinates']),
+        );
+    }
+
+    /**
+     * Parse lastest received message.
+     *
+     * @param array $data
+     *   The raw latestReceivedMessage data from the API.
+     *
+     * @return Message
+     *   Message object.
+     *
+     * @throws ParsingExecption
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     */
+    private function parseMessage(array $data): Message
+    {
+        return new Message(
+            id: (int) $data['id'],
+            createdAt: $this->parseDate($data['createdAt']),
+            sentTime: $this->parseDate($data['sentTime']),
+            rssi: $data['rssi'],
+            snr: $data['snr'],
+            rxInfo: $this->parseRxInfo($data['rawData']['rxInfo']),
+        );
+    }
+
+    /**
+     * Parse rx information.
+     *
+     * @param array $data
+     *   The raw rxInfo array from the API.
+     *
+     * @return array<ReceivedInfo>
+     *   All the received information metadata.
+     *
+     */
+    private function parseRxInfo(array $data): array
+    {
+        $info = [];
+
+        foreach ($data as $rxInfo) {
+            $info[] = new ReceivedInfo(
+               gatewayId: $rxInfo['gatewayId'],
+               rssi: $rxInfo['rssi'],
+               snr: $rxInfo['snr'],
+               crcStatus: $rxInfo['crcStatus'],
+               location: $this->parseLocation(['coordinates' => $rxInfo['location']]),
+            );
+        }
+
+        return $info;
+    }
+
+    /**
+     * Parse date into DateTime object.
      *
      * @param string|null $dateString
      *   The date/time from the API. If null, the date is assumed to be unix
@@ -82,7 +189,8 @@ final readonly class ApiParser
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
-    private function parseDate(?string $dateString): \DateTimeImmutable {
+    private function parseDate(?string $dateString): \DateTimeImmutable
+    {
         if (is_null($dateString)) {
             return new \DateTimeImmutable('1970-01-01 00:00:00', new \DateTimeZone($this->timezone));
         }
@@ -92,8 +200,8 @@ final readonly class ApiParser
             $errorMsg = null;
             $errors = \DateTime::getLastErrors();
             if (is_array($errors)) {
-                foreach ($errors as $error) {
-                    $errorMsg .= reset($error['warnings']) . PHP_EOL;
+                foreach ($errors['errors'] as $error) {
+                    $errorMsg .= $error . PHP_EOL;
                 }
             }
             $this->metricsService->counter(

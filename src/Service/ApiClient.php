@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Exception\ParsingExecption;
 use App\Model\Application;
+use App\Model\Device;
 use ItkDev\MetricsBundle\Service\MetricsService;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -28,7 +29,7 @@ final readonly class ApiClient
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    public function getApplications(bool $filterStatus): array
+    public function getApplications(bool $filterOnStatus): array
     {
         $response = $this->iotApiClient->request('GET', '/api/v1/application', [
             'query' => [
@@ -38,7 +39,7 @@ final readonly class ApiClient
         ]);
         $content = $response->getContent();
 
-        $data = $this->apiParser->applications($content, $filterStatus);
+        $data = $this->apiParser->applications($content, $filterOnStatus);
 
         $this->metricsService->gauge(
             name: 'api_fetched_applications',
@@ -49,5 +50,22 @@ final readonly class ApiClient
         return $data;
     }
 
+    public function getDevices(Application $application, bool $filterOnStatus)
+    {
+
+    }
+
+    public function getDevice(int $id): Device
+    {
+        $response = $this->iotApiClient->request('GET', '/api/v1/iot-device/' . $id);
+        $content = $response->getContent();
+
+
+        $device = $this->apiParser->device($content);
+
+        // @todo: add metrics
+
+        return $device;
+    }
 
 }
