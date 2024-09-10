@@ -19,15 +19,14 @@ class ApiApplicationsCommand extends Command
     public function __construct(
         private readonly ApiClient $apiClient,
         private readonly array $applicationStatus,
-    )
-    {
+    ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
         $this
-            ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: ' . implode(',', $this->applicationStatus))
+            ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->applicationStatus))
         ;
     }
 
@@ -39,14 +38,14 @@ class ApiApplicationsCommand extends Command
         $apps = $this->apiClient->getApplications($filter);
 
         foreach ($apps as $app) {
-            $io->writeln('<info>'.$app->name.'</info>');
+            $msg = sprintf("<info>%d \t- %s (devices: %d)</info>", $app->id, $app->name, count($app->devices));
+            $io->writeln($msg);
         }
 
         $msg = count($apps);
         if ($filter) {
             $msg .= sprintf(' applications found (filter on status "%s")', implode(',', $this->applicationStatus));
-        }
-        else {
+        } else {
             $msg .= ' applications found';
         }
         $io->success($msg);

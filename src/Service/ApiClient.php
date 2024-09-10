@@ -14,12 +14,17 @@ final readonly class ApiClient
         private HttpClientInterface $iotApiClient,
         private MetricsService $metricsService,
         private ApiParser $apiParser,
-    )
-    {
+    ) {
     }
 
     /**
+     * Get all applications.
+     *
+     * @param bool $filterOnStatus
+     *   Filter out applications based on statuses given in configuration
+     *
      * @return array<Application>
+     *   Parsed applications
      *
      * @throws ParsingExecption
      * @throws \DateInvalidTimeZoneException
@@ -41,31 +46,43 @@ final readonly class ApiClient
 
         $data = $this->apiParser->applications($content, $filterOnStatus);
 
-        $this->metricsService->gauge(
-            name: 'api_fetched_applications',
-            help: 'The number of applications fetched.',
-            value: count($data)
-        );
-
         return $data;
     }
 
-    public function getDevices(Application $application, bool $filterOnStatus)
+    /**
+     * Get a single application.
+     *
+     * @param int $id
+     *   ID for the application to fetch
+     *
+     * @return Application
+     *   Parsed application
+     *
+     * @throws ParsingExecption
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    public function getApplication(int $id): Application
     {
+        $response = $this->iotApiClient->request('GET', '/api/v1/application/'.$id);
+        $content = $response->getContent();
 
+        $app = $this->apiParser->application($content);
+
+        return $app;
     }
 
     public function getDevice(int $id): Device
     {
-        $response = $this->iotApiClient->request('GET', '/api/v1/iot-device/' . $id);
+        $response = $this->iotApiClient->request('GET', '/api/v1/iot-device/'.$id);
         $content = $response->getContent();
-
 
         $device = $this->apiParser->device($content);
 
-        // @todo: add metrics
-
         return $device;
     }
-
 }

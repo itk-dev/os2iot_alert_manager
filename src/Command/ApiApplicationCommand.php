@@ -11,10 +11,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:api:device',
-    description: 'Get device from API server',
+    name: 'app:api:application',
+    description: 'Get a single application from API server',
 )]
-class ApiDeviceCommand extends Command
+class ApiApplicationCommand extends Command
 {
     public function __construct(
         private readonly ApiClient $apiClient,
@@ -24,7 +24,8 @@ class ApiDeviceCommand extends Command
 
     protected function configure(): void
     {
-        $this->addArgument('id', InputArgument::REQUIRED, 'The id of the device to fetch data for');
+        $this
+            ->addArgument('id', InputArgument::REQUIRED, 'Application ID');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -32,10 +33,10 @@ class ApiDeviceCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $id = (int) $input->getArgument('id');
 
-        $device = $this->apiClient->getDevice($id);
+        $app = $this->apiClient->getApplication($id);
 
-        $output->writeln(json_encode($device, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        $io->success('Successfully fetch data for device');
+        $output->writeln(json_encode($app, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $io->success('Successfully fetch data for application');
 
         return Command::SUCCESS;
     }

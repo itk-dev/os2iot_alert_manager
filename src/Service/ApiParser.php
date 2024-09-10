@@ -19,33 +19,33 @@ final readonly class ApiParser
         private array $applicationStatus,
         private string $fromTimeZone,
         private string $timezone,
-        private string $timeformat
-    )
-    {
+        private string $timeformat,
+    ) {
     }
 
     /**
      * Get applications.
      *
      * @param string $content
-     *   Application data from the API.
+     *   Application data from the API
      * @param bool $filterOnStatus
-     *   Should we filter on the configured status.
+     *   Should we filter on the configured status
      *
-     * @return Array<Application>
-     *   All found applications.
+     * @return array<Application>
+     *   All found applications
      *
      * @throws ParsingExecption
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
-    public function applications(string $content, bool $filterOnStatus = false): array {
+    public function applications(string $content, bool $filterOnStatus = false): array
+    {
         $parse = new JsonParser($content);
         $parse->pointer('/data/-');
 
         $data = [];
 
-        /** @var  $app<string, mixed> */
+        /** @var array<string, mixed> $app */
         foreach ($parse as $app) {
             // Filter out applications with status not in the configuration.
             if ($filterOnStatus) {
@@ -54,36 +54,72 @@ final readonly class ApiParser
                 }
             }
 
-            $devices = [];
-            foreach ($app['iotDevices'] as $dev) {
-                $devices[] = $dev['id'];
-            }
-            $data[] = new Application(
-                id: (int) $app['id'],
-                createdAt: $this->parseDate($app['createdAt']),
-                updatedAt: $this->parseDate($app['updatedAt']),
-                startDate: $app['startDate'] ? $this->parseDate($app['startDate']) : null,
-                endDate: $app['endDate'] ? $this->parseDate($app['endDate']) : null,
-                name: $app['name'],
-                status: $this->statusToEnum($app['status']),
-                contactPerson: $app['contactPerson'],
-                contactEmail: $app['contactEmail'],
-                contactPhone: $app['contactPhone'],
-                devices: $devices,
-            );
+            $data[] = $this->application(json_encode($app, JSON_UNESCAPED_UNICODE));
         }
 
+        $this->metricsService->gauge(
+            name: 'api_parsed_applications',
+            help: 'The number of applications fetched.',
+            value: count($data),
+            labels: ['type' => 'info']
+        );
+
         return $data;
+    }
+
+    /**
+     * Parse a single application.
+     *
+     * @param string $content
+     *   Raw application data from API
+     *
+     * @return Application
+     *   Parsed application
+     *
+     * @throws ParsingExecption
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     */
+    public function application(string $content): Application
+    {
+        $parse = new JsonParser($content);
+        $data = $parse->toArray();
+
+        $devices = [];
+        foreach ($data['iotDevices'] as $dev) {
+            $devices[] = $dev['id'];
+        }
+        $app = new Application(
+            id: (int) $data['id'],
+            createdAt: $this->parseDate($data['createdAt']),
+            updatedAt: $this->parseDate($data['updatedAt']),
+            startDate: $data['startDate'] ? $this->parseDate($data['startDate']) : null,
+            endDate: $data['endDate'] ? $this->parseDate($data['endDate']) : null,
+            name: $data['name'],
+            status: $this->statusToEnum($data['status']),
+            contactPerson: $data['contactPerson'],
+            contactEmail: $data['contactEmail'],
+            contactPhone: $data['contactPhone'],
+            devices: $devices,
+        );
+
+        $this->metricsService->counter(
+            name: 'api_parsed_applications_total',
+            help: 'The total number of applications parsed.',
+            labels: ['type' => 'info']
+        );
+
+        return $app;
     }
 
     /**
      * Parse a single device's information.
      *
      * @param string $content
-     *   The device information from the API.
+     *   The device information from the API
      *
      * @return Device
-     *   Parsed device information object.
+     *   Parsed device information object
      *
      * @throws ParsingExecption
      * @throws \DateInvalidTimeZoneException
@@ -94,44 +130,89 @@ final readonly class ApiParser
         $parse = new JsonParser($content);
         $data = $parse->toArray();
 
-        return new Device(
+        $device = new Device(
             id: $data['id'],
             createdAt: $this->parseDate($data['createdAt']),
             updatedAt: $this->parseDate($data['createdAt']),
-            name: $data['id'],
+            name: $data['name'],
             location: $this->parseLocation($data['location']),
             latestReceivedMessage: $this->parseMessage($data['latestReceivedMessage']),
             statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
             // @todo: Parse metatdata when exsamples sesor is given.
-            metadata: []//$data['metadata'],
+            metadata: $this->parseMetadata($data['metadata']),
         );
+
+        $this->metricsService->counter(
+            name: 'api_parsed_devices_total',
+            help: 'The total number of devices parsed.',
+            labels: ['type' => 'info']
+        );
+
+        return $device;
+    }
+
+    /**
+     * Parse metadata.
+     *
+     * @TODO: better parsing, when better metadata is available.
+     *
+     * @param string $data
+     *   Raw metadata from the API
+     *
+     * @return mixed
+     *   JSON decoded data
+     *
+     * @throws ParsingExecption
+     */
+    private function parseMetadata(string $data): mixed
+    {
+        try {
+            return json_decode($data, associative: true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $this->metricsService->counter(
+                name: 'api_parse_metadata_error_total',
+                help: 'The total number of metadata parsing exceptions',
+                labels: ['type' => 'exception']
+            );
+            throw new ParsingExecption('Error parsing metadata', $e->getCode(), previous: $e);
+        }
     }
 
     /**
      * Parse location information.
      *
      * @param array $data
-     *   Raw location data from the API.
+     *   Raw location data from the API
      *
      * @return Location
-     *  Location object.
+     *  Location object
+     *
+     * @throws ParsingExecption
      */
     private function parseLocation(array $data): Location
     {
-        return new Location(
-            latitude: end($data['coordinates']),
-            longitude: reset($data['coordinates']),
+        if (is_array($data['coordinates']) && 2 == count($data['coordinates'])) {
+            return new Location(
+                latitude: end($data['coordinates']),
+                longitude: reset($data['coordinates']),
+            );
+        }
+        $this->metricsService->counter(
+            name: 'api_parse_location_error_total',
+            help: 'The total number of location parsing exceptions',
+            labels: ['type' => 'exception']
         );
+        throw new ParsingExecption('Error parsing location data');
     }
 
     /**
      * Parse lastest received message.
      *
      * @param array $data
-     *   The raw latestReceivedMessage data from the API.
+     *   The raw latestReceivedMessage data from the API
      *
      * @return Message
-     *   Message object.
+     *   Message object
      *
      * @throws ParsingExecption
      * @throws \DateInvalidTimeZoneException
@@ -153,11 +234,12 @@ final readonly class ApiParser
      * Parse rx information.
      *
      * @param array $data
-     *   The raw rxInfo array from the API.
+     *   The raw rxInfo array from the API
      *
      * @return array<ReceivedInfo>
-     *   All the received information metadata.
+     *   All the received information metadata
      *
+     * @throws ParsingExecption
      */
     private function parseRxInfo(array $data): array
     {
@@ -165,11 +247,11 @@ final readonly class ApiParser
 
         foreach ($data as $rxInfo) {
             $info[] = new ReceivedInfo(
-               gatewayId: $rxInfo['gatewayId'],
-               rssi: $rxInfo['rssi'],
-               snr: $rxInfo['snr'],
-               crcStatus: $rxInfo['crcStatus'],
-               location: $this->parseLocation(['coordinates' => $rxInfo['location']]),
+                gatewayId: $rxInfo['gatewayId'],
+                rssi: $rxInfo['rssi'],
+                snr: $rxInfo['snr'],
+                crcStatus: $rxInfo['crcStatus'],
+                location: $this->parseLocation(['coordinates' => $rxInfo['location']]),
             );
         }
 
@@ -182,8 +264,9 @@ final readonly class ApiParser
      * @param string|null $dateString
      *   The date/time from the API. If null, the date is assumed to be unix
      *   zero.
+     *
      * @return \DateTimeImmutable
-     *   The parsed date as an object.
+     *   The parsed date as an object
      *
      * @throws ParsingExecption
      * @throws \DateInvalidTimeZoneException
@@ -191,17 +274,18 @@ final readonly class ApiParser
      */
     private function parseDate(?string $dateString): \DateTimeImmutable
     {
+        $timezone = new \DateTimeZone($this->timezone);
         if (is_null($dateString)) {
-            return new \DateTimeImmutable('1970-01-01 00:00:00', new \DateTimeZone($this->timezone));
+            return new \DateTimeImmutable('1970-01-01 00:00:00', $timezone);
         }
 
         $date = \DateTimeImmutable::createFromFormat($this->timeformat, $dateString, new \DateTimeZone($this->fromTimeZone));
-        if ($date === false) {
+        if (false === $date) {
             $errorMsg = null;
             $errors = \DateTime::getLastErrors();
             if (is_array($errors)) {
                 foreach ($errors['errors'] as $error) {
-                    $errorMsg .= $error . PHP_EOL;
+                    $errorMsg .= $error.PHP_EOL;
                 }
             }
             $this->metricsService->counter(
@@ -212,20 +296,20 @@ final readonly class ApiParser
             throw new ParsingExecption($errorMsg ?? 'Unknown data conversion error');
         }
 
-        return $date->setTimezone(new \DateTimeZone($this->timezone));
+        return $date->setTimezone($timezone);
     }
 
     /**
      * Convert string to status enum.
      *
      * @param string|null $status
-     *   Status from the API.
+     *   Status from the API
      *
      * @return Status
-     *   The status as a status enum.
+     *   The status as a status enum
      *
      * @throws ParsingExecption
-     *   If the status is unknown.
+     *   If the status is unknown
      */
     private function statusToEnum(?string $status): Status
     {
