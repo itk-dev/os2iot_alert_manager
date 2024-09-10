@@ -9,13 +9,14 @@ final readonly class Gateway
 {
     public function __construct(
         public int $id,
-        public \DateTime $createdAt,
-        public \DateTime $updatedAt,
+        public string $gatewayId,
+        public \DateTimeImmutable $createdAt,
+        public \DateTimeImmutable $updatedAt,
+        public \DateTimeImmutable $lastSeenAt,
         public string $name,
-        public string $description,
+        public ?string $description,
         public Location $location,
         public Status $status,
-        public string $lastSeenAt,
     ) {
     }
 }

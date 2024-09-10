@@ -33,3 +33,6 @@ services:
         arguments:
             $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
 
+    App\Command\ApiGatewaysCommand:
+        arguments:
+            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'

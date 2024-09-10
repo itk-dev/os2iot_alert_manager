@@ -9,6 +9,7 @@ use App\Model\DataTypes\Message;
 use App\Model\DataTypes\ReceivedInfo;
 use App\Model\DataTypes\Status;
 use App\Model\Device;
+use App\Model\Gateway;
 use Cerbero\JsonParser\JsonParser;
 use ItkDev\MetricsBundle\Service\MetricsService;
 
@@ -138,7 +139,7 @@ final readonly class ApiParser
             location: $this->parseLocation($data['location']),
             latestReceivedMessage: $this->parseMessage($data['latestReceivedMessage']),
             statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
-            // @todo: Parse metatdata when exsamples sesor is given.
+            // @todo: Parse metadata when examples is given.
             metadata: $this->parseMetadata($data['metadata']),
         );
 
@@ -149,6 +150,60 @@ final readonly class ApiParser
         );
 
         return $device;
+    }
+
+    /**
+     * Parse multiple gateway's information.
+     *
+     * @param string $content
+     *   The gateway information from the API
+     * @param bool $filterOnStatus
+     *   Determines whether to filter out applications with a status not in the configuration
+     *
+     * @return array
+     *   An array of parsed gateway information objects
+     *
+     * @throws ParsingExecption
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     */
+    public function gateways(string $content, bool $filterOnStatus = false): array
+    {
+        $parse = new JsonParser($content);
+        $parse->pointer('/resultList/-');
+
+        $data = [];
+
+        /** @var array<string, mixed> $gateway */
+        foreach ($parse as $gateway) {
+            // Filter out applications with status not in the configuration.
+            if ($filterOnStatus) {
+                if (!in_array($gateway['status'], $this->applicationStatus)) {
+                    continue;
+                }
+            }
+
+            $data[] = new Gateway(
+                id: $gateway['id'],
+                gatewayId: $gateway['gatewayId'],
+                createdAt: $this->parseDate($gateway['createdAt']),
+                updatedAt: $this->parseDate($gateway['updatedAt']),
+                lastSeenAt: $this->parseDate($gateway['lastSeenAt']),
+                name: $gateway['name'],
+                description: $gateway['description'],
+                location: $this->parseLocation($gateway['location']),
+                status: $this->statusToEnum($gateway['status']),
+            );
+        }
+
+        $this->metricsService->gauge(
+            name: 'api_parsed_gateways',
+            help: 'The number of gateways fetched.',
+            value: count($data),
+            labels: ['type' => 'info']
+        );
+
+        return $data;
     }
 
     /**
@@ -191,10 +246,15 @@ final readonly class ApiParser
      */
     private function parseLocation(array $data): Location
     {
-        if (is_array($data['coordinates']) && 2 == count($data['coordinates'])) {
+        if (isset($data['coordinates']) && is_array($data['coordinates']) && 2 == count($data['coordinates'])) {
             return new Location(
                 latitude: end($data['coordinates']),
                 longitude: reset($data['coordinates']),
+            );
+        } elseif (isset($data['latitude']) && isset($data['longitude'])) {
+            return new Location(
+                latitude: $data['latitude'],
+                longitude: $data['longitude'],
             );
         }
         $this->metricsService->counter(
@@ -251,7 +311,7 @@ final readonly class ApiParser
                 rssi: $rxInfo['rssi'],
                 snr: $rxInfo['snr'],
                 crcStatus: $rxInfo['crcStatus'],
-                location: $this->parseLocation(['coordinates' => $rxInfo['location']]),
+                location: $this->parseLocation($rxInfo['location']),
             );
         }
 

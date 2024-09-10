@@ -5,14 +5,13 @@ namespace App\Service;
 use App\Exception\ParsingExecption;
 use App\Model\Application;
 use App\Model\Device;
-use ItkDev\MetricsBundle\Service\MetricsService;
+use App\Model\Gateway;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class ApiClient
 {
     public function __construct(
         private HttpClientInterface $iotApiClient,
-        private MetricsService $metricsService,
         private ApiParser $apiParser,
     ) {
     }
@@ -38,15 +37,13 @@ final readonly class ApiClient
     {
         $response = $this->iotApiClient->request('GET', '/api/v1/application', [
             'query' => [
-                'offset' => '0',
-                'limit' => '500',
+                'offset' => 0,
+                'limit' => 500,
             ],
         ]);
         $content = $response->getContent();
 
-        $data = $this->apiParser->applications($content, $filterOnStatus);
-
-        return $data;
+        return $this->apiParser->applications($content, $filterOnStatus);
     }
 
     /**
@@ -71,18 +68,53 @@ final readonly class ApiClient
         $response = $this->iotApiClient->request('GET', '/api/v1/application/'.$id);
         $content = $response->getContent();
 
-        $app = $this->apiParser->application($content);
-
-        return $app;
+        return $this->apiParser->application($content);
     }
 
+    /**
+     * Fetch a single IoT device.
+     *
+     * @param int $id
+     *   Identifier for the IoT device to retrieve
+     *
+     * @return Device
+     *   Parsed IoT device
+     *
+     * @throws ParsingExecption
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
     public function getDevice(int $id): Device
     {
         $response = $this->iotApiClient->request('GET', '/api/v1/iot-device/'.$id);
         $content = $response->getContent();
 
-        $device = $this->apiParser->device($content);
+        return $this->apiParser->device($content);
+    }
 
-        return $device;
+    /**
+     * @return array<Gateway>
+     *
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    public function getGateways(bool $filterOnStatus): array
+    {
+        $response = $this->iotApiClient->request('GET', '/api/v1/chirpstack/gateway', [
+            'query' => [
+                'organizationId' => 2,
+                'offset' => 0,
+                'limit' => 500,
+            ],
+        ]);
+        $content = $response->getContent();
+
+        return $this->apiParser->gateways($content, $filterOnStatus);
     }
 }
