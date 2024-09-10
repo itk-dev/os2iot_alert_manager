@@ -12,10 +12,18 @@ framework:
     http_client:
         scoped_clients:
             iot.api.client:
-                base_uri: 'https://os2iot-backend.prod.os2iot.kmd.dk'
+                base_uri: '%env(resolve:API_URL)%'
                 headers:
                     Accept: 'application/json'
-                    X-API-KEY: '%env(CLIENT_API_KEY)%'
+                    X-API-KEY: '%env(string:API_CLIENT_KEY)%'
+
+            sms.client:
+                base_uri: '%env(resolve:SMS_URL)%'
+                headers:
+                    Accept: 'application/json'
+                    ContentType: 'application/json'
+                    auth_bearer: '%env(string:SMS_GATEWAY_TOKEN)%'
+
 
 when@test:
     framework:
