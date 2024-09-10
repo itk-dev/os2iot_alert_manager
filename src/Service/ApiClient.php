@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Exception\ParsingExecption;
+use App\Exception\ParsingException;
 use App\Model\Application;
 use App\Model\Device;
 use App\Model\Gateway;
@@ -25,7 +25,7 @@ final readonly class ApiClient
      * @return array<Application>
      *   Parsed applications
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
@@ -55,7 +55,7 @@ final readonly class ApiClient
      * @return Application
      *   Parsed application
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
@@ -80,7 +80,7 @@ final readonly class ApiClient
      * @return Device
      *   Parsed IoT device
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface

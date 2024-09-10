@@ -10,6 +10,8 @@ See [keep a changelog] for information about writing changes to this log.
 
 ### Added
 
+- Added SMS gateway and command to send test SMS.
+- Added API client and commands to test it.
 - Metrics bundlen added.
 - Data model.
 - Symfony core.

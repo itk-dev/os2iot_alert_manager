@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Exception\ParsingExecption;
+use App\Exception\ParsingException;
 use App\Model\Application;
 use App\Model\DataTypes\Location;
 use App\Model\DataTypes\Message;
@@ -35,7 +35,7 @@ final readonly class ApiParser
      * @return array<Application>
      *   All found applications
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
@@ -77,7 +77,7 @@ final readonly class ApiParser
      * @return Application
      *   Parsed application
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
@@ -122,7 +122,7 @@ final readonly class ApiParser
      * @return Device
      *   Parsed device information object
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
@@ -163,7 +163,7 @@ final readonly class ApiParser
      * @return array
      *   An array of parsed gateway information objects
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
@@ -217,7 +217,7 @@ final readonly class ApiParser
      * @return mixed
      *   JSON decoded data
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      */
     private function parseMetadata(string $data): mixed
     {
@@ -229,7 +229,7 @@ final readonly class ApiParser
                 help: 'The total number of metadata parsing exceptions',
                 labels: ['type' => 'exception']
             );
-            throw new ParsingExecption('Error parsing metadata', $e->getCode(), previous: $e);
+            throw new ParsingException('Error parsing metadata', $e->getCode(), previous: $e);
         }
     }
 
@@ -242,7 +242,7 @@ final readonly class ApiParser
      * @return Location
      *  Location object
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      */
     private function parseLocation(array $data): Location
     {
@@ -262,7 +262,7 @@ final readonly class ApiParser
             help: 'The total number of location parsing exceptions',
             labels: ['type' => 'exception']
         );
-        throw new ParsingExecption('Error parsing location data');
+        throw new ParsingException('Error parsing location data');
     }
 
     /**
@@ -274,7 +274,7 @@ final readonly class ApiParser
      * @return Message
      *   Message object
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
@@ -299,7 +299,7 @@ final readonly class ApiParser
      * @return array<ReceivedInfo>
      *   All the received information metadata
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      */
     private function parseRxInfo(array $data): array
     {
@@ -328,7 +328,7 @@ final readonly class ApiParser
      * @return \DateTimeImmutable
      *   The parsed date as an object
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
@@ -353,7 +353,7 @@ final readonly class ApiParser
                 help: 'The total number of date parsing exceptions',
                 labels: ['type' => 'exception']
             );
-            throw new ParsingExecption($errorMsg ?? 'Unknown data conversion error');
+            throw new ParsingException($errorMsg ?? 'Unknown data conversion error');
         }
 
         return $date->setTimezone($timezone);
@@ -368,7 +368,7 @@ final readonly class ApiParser
      * @return Status
      *   The status as a status enum
      *
-     * @throws ParsingExecption
+     * @throws ParsingException
      *   If the status is unknown
      */
     private function statusToEnum(?string $status): Status
@@ -383,7 +383,7 @@ final readonly class ApiParser
                 help: 'The total number of invalid status exceptions',
                 labels: ['type' => 'exception']
             );
-            throw new ParsingExecption("Invalid status value: $status");
+            throw new ParsingException("Invalid status value: $status");
         }
 
         return $value;
