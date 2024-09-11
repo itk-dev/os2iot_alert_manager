@@ -36,6 +36,12 @@ services:
             $highPriority: '%env(bool:SMS_HIGH_PRIORITY)%'
             $dryRun: '%env(bool:SMS_DRY_RUN)%'
 
+    App\Service\MailService:
+        arguments:
+            $fromAddress: '%env(string:MAILS_FROM)%'
+            $replyAddress: '%env(string:MAILS_REPLY_TO)%'
+            $defaultAddress: '%env(string:MAILS_DEFAULT_TO)%'
+
     App\Command\ApiApplicationsCommand:
         arguments:
             $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
@@ -43,9 +49,3 @@ services:
     App\Command\ApiGatewaysCommand:
         arguments:
             $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
-
-    App\Command\MailService:
-        arguments:
-            $fromAddress: '%env(string:MAILS_FROM)%'
-            $replyAddress: '%env(string:MAILS_REPLY_TO)%'
-            $defaultAddress: '%env(string:MAILS_DEFAULT_TO)%'
