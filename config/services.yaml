@@ -24,7 +24,7 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Service\ApiParser:
         arguments:
-            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
+            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
             $fromTimeZone: '%env(string:API_ORIGINAL_TIMEZONE)%'
             $timezone: '%env(string:API_TO_TIMEZONE)%'
             $timeformat: '%env(string:API_DATE_FORMAT)%'
@@ -36,10 +36,16 @@ services:
             $highPriority: '%env(bool:SMS_HIGH_PRIORITY)%'
             $dryRun: '%env(bool:SMS_DRY_RUN)%'
 
+    App\Service\MailService:
+        arguments:
+            $fromAddress: '%env(string:MAILS_FROM)%'
+            $replyAddress: '%env(string:MAILS_REPLY_TO)%'
+            $defaultAddress: '%env(string:MAILS_DEFAULT_TO)%'
+
     App\Command\ApiApplicationsCommand:
         arguments:
-            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
+            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
 
     App\Command\ApiGatewaysCommand:
         arguments:
-            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
+            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
