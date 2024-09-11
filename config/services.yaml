@@ -24,7 +24,7 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Service\ApiParser:
         arguments:
-            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
+            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
             $fromTimeZone: '%env(string:API_ORIGINAL_TIMEZONE)%'
             $timezone: '%env(string:API_TO_TIMEZONE)%'
             $timeformat: '%env(string:API_DATE_FORMAT)%'
@@ -38,8 +38,8 @@ services:
 
     App\Command\ApiApplicationsCommand:
         arguments:
-            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
+            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
 
     App\Command\ApiGatewaysCommand:
         arguments:
-            $applicationStatus: '%env(csv:APPLICATION_STATUS)%'
+            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
