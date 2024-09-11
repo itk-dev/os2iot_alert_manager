@@ -2,16 +2,22 @@
 
 <p>Seneste kontakt var {{ lastSeenDate|date("d-m-Y H:i:s") }}.</p>
 
-<p><strong>Navn</strong>: {{ name }}</p>
-<p><strong>Beskrivelse</strong>: {{ description }}</p>
+<table>
+    <tr>
+        <td><strong>Navn</strong>:</td><td>{{ name }}</td>
+    </tr>
+    <tr>
+        <td><strong>Beskrivelse</strong>:</td><td>{{ description }}</td>
+    </tr>
+    <tr>
+        <td><strong>Batteristatus</strong>:</td><td>{{ battery|number_format(2, '.', '') }}%</td>
+    </tr>
+</table>
+
+<br/>
 
 <p><strong>Årsagen kan være</strong></p>
 <ol>
-    <li>At enheden er løbet tør for batteri.
-        <ul>
-            <li>Hvis det er tilfældet, så undersøg batteristatus for andre sensorer i løsningen.</li>
-        </ul>
-    </li>
     <li>Manglende dækning. IoT Lab kan hjælpe med at opsætte yderligere gateways.</li>
     <li>Defekt enhed. Kontakt IoT Lab hvis enheden skal udskiftes.</li>
 </ol>
@@ -21,4 +27,4 @@
 Se placering på <a href="https://www.openstreetmap.org?mlat={{ location.latitude }}&mlon={{ location.longitude }}/#map=16/{{ location.latitude }}/{{ location.longitude }}">https://www.openstreetmap.org/</a>
 </p>
 
-<img src="{{ email.image('@assets/logo_100.png') }}" alt="Logo">
+{% include 'mails/logo.html.twig' %}

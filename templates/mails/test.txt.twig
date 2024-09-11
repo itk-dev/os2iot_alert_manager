@@ -4,12 +4,11 @@ Seneste kontakt var {{ lastSeenDate|date("d-m-Y H:i:s") }}
 
 Navn: {{ name }}
 Beskrivelse: {{ description }}
+Batteristatus: {{ battery|number_format(2, '.', '') }}
 
 Årsagen kan være
-1. At enheden er løbet tør for batteri.
-    * Hvis det er tilfældet, så undersøg batteristatus for andre sensorer i løsningen.
-2. Manglende dækning. IoT Lab kan hjælpe med at opsætte yderligere gateways.
-3. Defekt enhed. Kontakt IoT Lab hvis enheden skal udskiftes.
+1. Manglende dækning. IoT Lab kan hjælpe med at opsætte yderligere gateways.
+2. Defekt enhed. Kontakt IoT Lab hvis enheden skal udskiftes.
 
 Enheden er registreret til at være placeret i punktet {{ location.latitude }}, {{ location.longitude }}
 

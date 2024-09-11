@@ -51,6 +51,7 @@ class MailTestCommand extends Command
                     'latitude' => 56.153540,
                     'longitude' => 10.214136,
                 ],
+                'battery' => 67.234643,
             ],
         );
 
