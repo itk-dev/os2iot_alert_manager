@@ -43,3 +43,9 @@ services:
     App\Command\ApiGatewaysCommand:
         arguments:
             $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
+
+    App\Command\MailService:
+        arguments:
+            $fromAddress: '%env(string:MAILS_FROM)%'
+            $replyAddress: '%env(string:MAILS_REPLY_TO)%'
+            $defaultAddress: '%env(string:MAILS_DEFAULT_TO)%'
