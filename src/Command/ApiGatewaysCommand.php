@@ -38,7 +38,7 @@ class ApiGatewaysCommand extends Command
         $gateways = $this->apiClient->getGateways($filter);
 
         foreach ($gateways as $gateway) {
-            $msg = sprintf("<info>%d (%s) \t- %s (Seen: %s) %s</info>", $gateway->id, $gateway->gatewayId, $gateway->name, $gateway->lastSeenAt->format('d-m-Y H:i:s'), $gateway->status->value);
+            $msg = sprintf("<info>%d (%s) \t- %s (Seen: %s)</info>", $gateway->id, $gateway->gatewayId, $gateway->name, $gateway->lastSeenAt->format('d-m-Y H:i:s'));
             $io->writeln($msg);
         }
 

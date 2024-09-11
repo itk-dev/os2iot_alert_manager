@@ -140,7 +140,7 @@ final readonly class ApiParser
             latestReceivedMessage: $this->parseMessage($data['latestReceivedMessage']),
             statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
             // @todo: Parse metadata when examples is given.
-            metadata: $this->parseMetadata($data['metadata']),
+            metadata: $this->parseMetadata($data['metadata'] ?? '[]'),
         );
 
         $this->metricsService->counter(
@@ -222,7 +222,8 @@ final readonly class ApiParser
     private function parseMetadata(string $data): mixed
     {
         try {
-            return json_decode($data, associative: true, flags: JSON_THROW_ON_ERROR);
+            $json = json_decode($data, associative: true, flags: JSON_THROW_ON_ERROR);
+            return $json ?? [];
         } catch (\JsonException $e) {
             $this->metricsService->counter(
                 name: 'api_parse_metadata_error_total',

@@ -50,6 +50,11 @@ final readonly class SmsClient
     {
         foreach ($to as $no) {
             if (!$this->validatePhoneNumber($no)) {
+                $this->metricsService->counter(
+                    name: 'sms_invalid_numbers_total',
+                    help: 'The total number of invalid phone number',
+                    labels: ['type' => 'exception']
+                );
                 throw new SmsException('Invalid phone number: '.$no);
             }
         }
@@ -78,6 +83,11 @@ final readonly class SmsClient
             ]);
             $batchId = $response->getContent();
         } catch (TransportExceptionInterface|ServerExceptionInterface|RedirectionExceptionInterface|ClientExceptionInterface $e) {
+            $this->metricsService->counter(
+                name: 'sms_execution_total',
+                help: 'The total number of failed SMS\s',
+                labels: ['type' => 'exception']
+            );
             throw new SmsException($e->getMessage(), $e->getCode(), $e);
         }
 
