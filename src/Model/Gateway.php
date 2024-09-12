@@ -17,6 +17,9 @@ final readonly class Gateway
         public ?string $description,
         public Location $location,
         public Status $status,
+        public ?string $responsibleName,
+        public ?string $responsibleEmail,
+        public ?string $responsiblePhone,
     ) {
     }
 }

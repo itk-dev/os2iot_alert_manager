@@ -139,7 +139,6 @@ final readonly class ApiParser
             location: $this->parseLocation($data['location']),
             latestReceivedMessage: $this->parseMessage($data['latestReceivedMessage']),
             statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
-            // @todo: Parse metadata when examples is given.
             metadata: $this->parseMetadata($data['metadata'] ?? '[]'),
         );
 
@@ -193,6 +192,9 @@ final readonly class ApiParser
                 description: $gateway['description'],
                 location: $this->parseLocation($gateway['location']),
                 status: $this->statusToEnum($gateway['status']),
+                responsibleName: $gateway['gatewayResponsibleName'],
+                responsibleEmail: $gateway['gatewayResponsibleEmail'],
+                responsiblePhone: $gateway['gatewayResponsiblePhoneNumber'],
             );
         }
 
@@ -223,6 +225,7 @@ final readonly class ApiParser
     {
         try {
             $json = json_decode($data, associative: true, flags: JSON_THROW_ON_ERROR);
+
             return $json ?? [];
         } catch (\JsonException $e) {
             $this->metricsService->counter(

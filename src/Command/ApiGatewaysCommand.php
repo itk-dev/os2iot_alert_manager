@@ -27,6 +27,7 @@ class ApiGatewaysCommand extends Command
     {
         $this
             ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->applicationStatus))
+            ->addOption('id', null, InputOption::VALUE_REQUIRED, 'Show details for gateway with this ID', -1)
         ;
     }
 
@@ -34,12 +35,28 @@ class ApiGatewaysCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $filter = $input->getOption('filterStatus');
+        $id = (int) $input->getOption('id');
 
         $gateways = $this->apiClient->getGateways($filter);
 
         foreach ($gateways as $gateway) {
             $msg = sprintf("<info>%d (%s) \t- %s (Seen: %s)</info>", $gateway->id, $gateway->gatewayId, $gateway->name, $gateway->lastSeenAt->format('d-m-Y H:i:s'));
             $io->writeln($msg);
+        }
+
+        // Show details for one of the gateways.
+        if ($id >= 0) {
+            $found = false;
+            foreach ($gateways as $gateway) {
+                if ($gateway->id === $id) {
+                    $output->writeln('');
+                    $output->writeln(json_encode($gateway, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                    $found = true;
+                }
+            }
+            if (!$found) {
+                $io->error('Gateway with the id '.$id.' not found');
+            }
         }
 
         $msg = count($gateways);

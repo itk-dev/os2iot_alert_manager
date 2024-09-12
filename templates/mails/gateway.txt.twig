@@ -1,0 +1,14 @@
+Der har ikke været kontakt til {{ gateway.name }} i {{ diff }}.
+
+Seneste kontakt var {{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}. Årsagerne kan
+være strømsvigt, manglende netværksdækning eller at udstyret skal genstartes.
+
+Navn: {{ gateway.name }}
+ID: {{ gateway.gatewayId }}
+Beskrivelse: {{ gateway.description }}
+
+{% include 'mails/location.txt.twig' with { 'type': 'Gatewayen', 'latitude': gateway.location.latitude, 'longitude': gateway.location.longitude } %}
+
+<p>Du kan se opsætningen af gatewayen på: {{ url }}</p>
+
+{% include 'mails/logo.html.twig' %}

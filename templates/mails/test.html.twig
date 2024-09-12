@@ -22,9 +22,6 @@
     <li>Defekt enhed. Kontakt IoT Lab hvis enheden skal udskiftes.</li>
 </ol>
 
-<p>Enheden er registreret til at være placeret i punktet {{ location.latitude }}, {{ location.longitude }}
-<br /><br />
-Se placering på <a href="https://www.openstreetmap.org?mlat={{ location.latitude }}&mlon={{ location.longitude }}/#map=16/{{ location.latitude }}/{{ location.longitude }}">https://www.openstreetmap.org/</a>
-</p>
+{% include 'mails/location.html.twig' with { 'type': 'Enheden', 'latitude': location.latitude, 'longitude': location.longitude } %}
 
 {% include 'mails/logo.html.twig' %}
