@@ -18,7 +18,7 @@ class ApiGatewaysCommand extends Command
 {
     public function __construct(
         private readonly ApiClient $apiClient,
-        private readonly array $applicationStatus,
+        private readonly array $statuses,
     ) {
         parent::__construct();
     }
@@ -26,7 +26,7 @@ class ApiGatewaysCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->applicationStatus))
+            ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
             ->addOption('id', null, InputOption::VALUE_REQUIRED, 'Show details for gateway with this ID', -1)
         ;
     }
@@ -61,7 +61,7 @@ class ApiGatewaysCommand extends Command
 
         $msg = count($gateways);
         if ($filter) {
-            $msg .= sprintf(' gateways found (filter on status "%s")', implode(',', $this->applicationStatus));
+            $msg .= sprintf(' gateways found (filter on status "%s")', implode(',', $this->statuses));
         } else {
             $msg .= ' applications found';
         }

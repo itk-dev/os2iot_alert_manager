@@ -17,7 +17,7 @@ final readonly class ApiParser
 {
     public function __construct(
         private MetricsService $metricsService,
-        private array $applicationStatus,
+        private array $statuses,
         private string $fromTimeZone,
         private string $timezone,
         private string $timeformat,
@@ -50,7 +50,7 @@ final readonly class ApiParser
         foreach ($parse as $app) {
             // Filter out applications with status not in the configuration.
             if ($filterOnStatus) {
-                if (!in_array($app['status'], $this->applicationStatus)) {
+                if (!in_array($app['status'], $this->statuses)) {
                     continue;
                 }
             }
@@ -177,7 +177,7 @@ final readonly class ApiParser
         foreach ($parse as $gateway) {
             // Filter out applications with status not in the configuration.
             if ($filterOnStatus) {
-                if (!in_array($gateway['status'], $this->applicationStatus)) {
+                if (!in_array($gateway['status'], $this->statuses)) {
                     continue;
                 }
             }

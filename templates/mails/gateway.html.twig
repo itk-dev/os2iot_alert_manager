@@ -1,7 +1,7 @@
-<p>Der har ikke været kontakt til {{ gateway.name }} i {{ diff }}.</p>
+<p>Der har ikke været kontakt til {{ gateway.name }} i {{ diff|number_format(2, '', '.') }}.</p>
 
-<p>Seneste kontakt var {{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}. Årsagerne kan være strømsvigt, manglende
-    netværksdækning eller at udstyret skal genstartes.</p>
+<p>Seneste kontakt var <strong>{{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}.</strong></p>
+<p>Årsagerne kan være strømsvigt, manglende netværksdækning eller at udstyret skal genstartes.</p>
 
 <table>
     <tr>
@@ -11,12 +11,12 @@
         <td><strong>ID</strong>:</td><td>{{ gateway.gatewayId }}</td>
     </tr>
     <tr>
-        <td><strong>Beskrivelse</strong>:</td><td>{{ gateway.description }}</td>
+        <td><strong>Beskrivelse</strong>:</td><td>{{ gateway.description|replace({'\n': '<br>'})|raw }}</td>
     </tr>
 </table>
 
 {% include 'mails/location.html.twig' with { 'type': 'Gatewayen', 'latitude': gateway.location.latitude, 'longitude': gateway.location.longitude } %}
 
-<p>Du kan se opsætningen af gatewayen på: {{ url }}</p>
+<p>Du kan se opsætningen af gatewayen på: <a href="{{ url }}">{{ url }}</a></p>
 
 {% include 'mails/logo.html.twig' %}

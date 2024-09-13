@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="5.26.0@4787eaf414e16c661902b94dfe5d882223e5b513">
+  <file src="src/Command/AlertChecksCommand.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->timezone]]></code>
+    </ArgumentTypeCoercion>
+    <FalsableReturnStatement>
+      <code><![CDATA[\DateTimeImmutable::createFromFormat($this->dateFormat, $date, $timezone)]]></code>
+    </FalsableReturnStatement>
+  </file>
   <file src="src/Service/ApiParser.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$this->fromTimeZone]]></code>

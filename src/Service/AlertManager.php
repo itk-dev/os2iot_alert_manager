@@ -2,8 +2,9 @@
 
 namespace App\Service;
 
+use App\Exception\MailException;
+use App\Exception\ParsingException;
 use App\Model\Gateway;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -30,18 +31,11 @@ final readonly class AlertManager
      * @param bool $filterOnStatus
      *   Indicates whether to filter gateways based on a specific status
      *
-     * @throws \App\Exception\MailException
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     */
-    /**
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws \App\Exception\MailException
-     * @throws \App\Exception\ParsingException
+     * @throws MailException
+     * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      * @throws HttpClientTransportExceptionInterface
@@ -53,10 +47,9 @@ final readonly class AlertManager
             $diff = $this->timeDiffInSeconds($gateway->lastSeenAt, $now);
             if ($diff >= $this->gatewayLimit) {
                 $subject = sprintf(
-                    'Gateway %s offline siden %s - %d',
+                    'Gateway %s offline siden %s',
                     $gateway->name,
-                    $gateway->lastSeenAt->format(\DateTimeInterface::ATOM),
-                    $diff
+                    $gateway->lastSeenAt->format('m-d-y H:i:s')
                 );
                 // Gateway limit for last seen is reached.
                 $this->mailService->sendEmail(
@@ -74,11 +67,19 @@ final readonly class AlertManager
         }
     }
 
+    public function checkApplications(\DateTimeImmutable $now, bool $filterOnStatus = true): void
+    {
+    }
+
+    public function checkDevice(int $deviceId): void
+    {
+    }
+
     /**
      * Get the time differences between two date objects in seconds.
      *
      * @param \DateTimeImmutable $date
-     *   The frist date
+     *   The first date
      * @param \DateTimeImmutable $now
      *   The next date normally "now"
      *
@@ -87,7 +88,7 @@ final readonly class AlertManager
      */
     private function timeDiffInSeconds(\DateTimeImmutable $date, \DateTimeImmutable $now): int
     {
-        return $date->getTimestamp() - $now->getTimestamp();
+        return $now->getTimestamp() - $date->getTimestamp();
     }
 
     /**
