@@ -48,10 +48,17 @@ services:
 
     App\Service\AlertManager:
         arguments:
+            $applicationCheckStartDate: '%env(bool:ALTER_APPLICATION_CHECK_START_DATE)%'
             $gatewayLimit: '%env(int:ALERT_GATEWAY_LIMIT)%'
             $gatewayFallbackMail: '%env(string:ALERT_GATEWAY_FALLBACK_MAIL)%'
             $gatewayFallbackPhone: '%env(string:ALERT_GATEWAY_FALLBACK_PHONE)%'
             $gatewayBaseUrl: '%env(resolve:ALERT_GATEWAY_URL)%'
+            $deviceFallbackLimit: '%env(int:ALERT_DEVICE_FALLBACK_LIMIT)%'
+            $deviceFallbackMail: '%env(string:ALERT_DEVICE_FALLBACK_MAIL)%'
+            $deviceFallbackPhone: '%env(string:ALERT_DEVICE_FALLBACK_PHONE)%'
+            $deviceMetadataFieldLimit: '%env(ALTER_DEVICE_METADATA_THRESHOLD_FIELD)%'
+            $deviceMetadataFieldMail: '%env(ALERT_DEVICE_METADATA_MAIL_FIELD)%'
+            $deviceMetadataFieldPhone: '%env(ALTER_DEVICE_METADATA_PHONE_FIELD)%'
 
     App\Command\ApiApplicationsCommand:
         arguments:

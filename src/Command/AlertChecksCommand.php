@@ -19,9 +19,9 @@ class AlertChecksCommand extends Command
     private string $dateFormat = 'd-m-y\TH:i:s';
 
     public function __construct(
-        private AlertManager $alertManager,
-        private string $timezone,
-        private array $statuses,
+        private readonly AlertManager $alertManager,
+        private readonly string $timezone,
+        private readonly array $statuses,
     ) {
         parent::__construct();
     }
@@ -41,6 +41,9 @@ class AlertChecksCommand extends Command
         ;
     }
 
+    /**
+     * @todo: Added exception handling and metrics to log errors.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -68,7 +71,7 @@ class AlertChecksCommand extends Command
 
                 return Command::FAILURE;
             }
-            $this->alertManager->checkDevice($deviceId);
+            $this->alertManager->checkDevice($now, $deviceId);
         }
 
         return Command::SUCCESS;

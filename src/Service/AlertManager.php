@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Exception\MailException;
 use App\Exception\ParsingException;
+use App\Model\Application;
 use App\Model\Gateway;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -16,10 +17,17 @@ final readonly class AlertManager
         private ApiClient $apiClient,
         private SmsClient $smsClient,
         private MailService $mailService,
+        private bool $applicationCheckStartDate,
         private int $gatewayLimit,
         private string $gatewayFallbackMail,
         private string $gatewayFallbackPhone,
         private string $gatewayBaseUrl,
+        private int $deviceFallbackLimit,
+        private string $deviceFallbackMail,
+        private string $deviceFallbackPhone,
+        private string $deviceMetadataFieldLimit,
+        private string $deviceMetadataFieldMail,
+        private string $deviceMetadataFieldPhone,
     ) {
     }
 
@@ -63,16 +71,40 @@ final readonly class AlertManager
                     htmlTemplate: 'gateway.html.twig',
                     textTemplate: 'gateway.txt.twig',
                 );
+
+                // @todo: SMS?
             }
         }
     }
 
     public function checkApplications(\DateTimeImmutable $now, bool $filterOnStatus = true): void
     {
+        $apps = $this->apiClient->getApplications($filterOnStatus);
+        foreach ($apps as $app) {
+            if ($this->skipBasedOnAppStartDate($app)) {
+                continue;
+            }
+
+            foreach ($app->devices as $deviceId) {
+                $this->checkDevice($now, $deviceId);
+            }
+        }
     }
 
-    public function checkDevice(int $deviceId): void
+    public function checkDevice(\DateTimeImmutable $now, int $deviceId): void
     {
+        $device = $this->apiClient->getDevice($deviceId);
+
+        // Check timeout.
+        $limit = $device->metadata[$this->deviceMetadataFieldLimit] ?? $this->deviceFallbackLimit;
+        $diff = $this->timeDiffInSeconds($device->latestReceivedMessage->sentTime, $now);
+        if ($diff >= $limit) {
+            $mail = $device->metadata[$this->deviceMetadataFieldMail] ?? $this->deviceFallbackMail;
+            $phone = $device->metadata[$this->deviceMetadataFieldPhone] ?? $this->deviceFallbackPhone;
+
+            // @todo: send mail
+            // @todo: send sms
+        }
     }
 
     /**
@@ -103,5 +135,30 @@ final readonly class AlertManager
     private function findGatewayToMailAddress(Gateway $gateway): string
     {
         return $gateway->responsibleEmail ?? $this->gatewayFallbackMail;
+    }
+
+    /**
+     * Skip checking application based on start date.
+     *
+     * @param Application $application
+     *   Application to test
+     *
+     * @return bool
+     *   If the current time is before the application's start date, it returns
+     *   true to indicate skipping, otherwise, it returns false
+     */
+    private function skipBasedOnAppStartDate(Application $application): bool
+    {
+        if ($this->applicationCheckStartDate) {
+            if (is_null($application->startDate)) {
+                // If no application start date is given, we need to not skip as
+                // we do not have data to skip on.
+                return false;
+            }
+
+            return time() <= $application->startDate->getTimestamp();
+        }
+
+        return false;
     }
 }
