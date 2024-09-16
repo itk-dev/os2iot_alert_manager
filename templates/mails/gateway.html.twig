@@ -1,17 +1,18 @@
-<p>Der har ikke været kontakt til {{ gateway.name }} i {{ diff|number_format(2, '', '.') }}.</p>
+<p>Der har ikke været kontakt til {{ gateway.name }} i {{ diff|number_format(2, '', '.') }} sekunder.</p>
 
 <p>Seneste kontakt var <strong>{{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}.</strong></p>
 <p>Årsagerne kan være strømsvigt, manglende netværksdækning eller at udstyret skal genstartes.</p>
 
-<table>
+<p><strong>Gateway information</strong></p>
+<table style="margin-left: 10px;">
     <tr>
-        <td><strong>Navn</strong>:</td><td>{{ gateway.name }}</td>
+        <td>Navn:</td><td>{{ gateway.name }}</td>
     </tr>
     <tr>
-        <td><strong>ID</strong>:</td><td>{{ gateway.gatewayId }}</td>
+        <td>ID:</td><td>{{ gateway.gatewayId }}</td>
     </tr>
     <tr>
-        <td><strong>Beskrivelse</strong>:</td><td>{{ gateway.description|replace({'\n': '<br>'})|raw }}</td>
+        <td>Beskrivelse:</td><td>{{ gateway.description|replace({'\n': '<br>'})|raw }}</td>
     </tr>
 </table>
 

@@ -17,6 +17,7 @@ final readonly class ApiClient
         private HttpClientInterface $iotApiClient,
         private ApiParser $apiParser,
         private int $gateWayOrgId,
+        private int $apiRequestLimit,
     ) {
     }
 
@@ -42,7 +43,7 @@ final readonly class ApiClient
         $response = $this->iotApiClient->request('GET', '/api/v1/application', [
             'query' => [
                 'offset' => 0,
-                'limit' => 500,
+                'limit' => $this->apiRequestLimit,
             ],
         ]);
         $content = $response->getContent();
@@ -123,7 +124,7 @@ final readonly class ApiClient
             'query' => [
                 'organizationId' => $this->gateWayOrgId,
                 'offset' => 0,
-                'limit' => 500,
+                'limit' => $this->apiRequestLimit,
             ],
         ]);
         $content = $response->getContent();

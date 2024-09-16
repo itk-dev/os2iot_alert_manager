@@ -28,6 +28,7 @@ final readonly class AlertManager
         private string $deviceMetadataFieldLimit,
         private string $deviceMetadataFieldMail,
         private string $deviceMetadataFieldPhone,
+        private string $deviceBaseUrl,
     ) {
     }
 
@@ -55,7 +56,7 @@ final readonly class AlertManager
             $diff = $this->timeDiffInSeconds($gateway->lastSeenAt, $now);
             if ($diff >= $this->gatewayLimit) {
                 $subject = sprintf(
-                    'Gateway %s offline siden %s',
+                    'Gateway "%s" offline siden %s',
                     $gateway->name,
                     $gateway->lastSeenAt->format('m-d-y H:i:s')
                 );
@@ -91,7 +92,7 @@ final readonly class AlertManager
         }
     }
 
-    public function checkDevice(\DateTimeImmutable $now, int $deviceId): void
+    public function checkDevice(\DateTimeImmutable $now, int $deviceId, ?Application $application = null): void
     {
         $device = $this->apiClient->getDevice($deviceId);
 
@@ -99,10 +100,29 @@ final readonly class AlertManager
         $limit = $device->metadata[$this->deviceMetadataFieldLimit] ?? $this->deviceFallbackLimit;
         $diff = $this->timeDiffInSeconds($device->latestReceivedMessage->sentTime, $now);
         if ($diff >= $limit) {
-            $mail = $device->metadata[$this->deviceMetadataFieldMail] ?? $this->deviceFallbackMail;
-            $phone = $device->metadata[$this->deviceMetadataFieldPhone] ?? $this->deviceFallbackPhone;
+            $toMailAddress = $device->metadata[$this->deviceMetadataFieldMail] ?? ($application->contactEmail ?? $this->deviceFallbackMail);
+            $phone = $device->metadata[$this->deviceMetadataFieldPhone] ?? ($application->contactEmail ?? $this->deviceFallbackPhone);
 
+            // ENHEDSNAVN offline siden TIDSPUNKT - VARIGHED
             // @todo: send mail
+            $subject = sprintf(
+                'Enhed "%s" offline siden %s',
+                $device->name,
+                $device->latestReceivedMessage->sentTime->format('m-d-y H:i:s')
+            );
+            // Gateway limit for last seen is reached.
+            $this->mailService->sendEmail(
+                to: $toMailAddress,
+                context: [
+                    'device' => $device,
+                    'diff' => $diff,
+                    'url' => $this->deviceBaseUrl.$device->id,
+                ],
+                subject: $subject,
+                htmlTemplate: 'device.html.twig',
+                textTemplate: 'device.txt.twig',
+            );
+
             // @todo: send sms
         }
     }

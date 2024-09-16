@@ -25,6 +25,7 @@ services:
     App\Service\ApiClient:
         arguments:
             $gateWayOrgId: '%env(int:ALERT_GATEWAY_ORG_ID)%'
+            $apiRequestLimit: '%env(int:API_REQUEST_LIMIT)%'
 
     App\Service\ApiParser:
         arguments:
@@ -59,6 +60,7 @@ services:
             $deviceMetadataFieldLimit: '%env(ALTER_DEVICE_METADATA_THRESHOLD_FIELD)%'
             $deviceMetadataFieldMail: '%env(ALERT_DEVICE_METADATA_MAIL_FIELD)%'
             $deviceMetadataFieldPhone: '%env(ALTER_DEVICE_METADATA_PHONE_FIELD)%'
+            $deviceBaseUrl: '%env(resolve:ALERT_DEVICE_URL)%'
 
     App\Command\ApiApplicationsCommand:
         arguments:
