@@ -61,6 +61,10 @@ services:
             $deviceMetadataFieldMail: '%env(ALERT_DEVICE_METADATA_MAIL_FIELD)%'
             $deviceMetadataFieldPhone: '%env(ALTER_DEVICE_METADATA_PHONE_FIELD)%'
             $deviceBaseUrl: '%env(resolve:ALERT_DEVICE_URL)%'
+            $gatewaySilencedTag: '%env(string:ALTER_GATEWAY_SILENCED_TAG)%'
+            $deviceMetadataFieldSilenced: '%env(string:ALTER_DEVICE_METADATA_SILENCED_FIELD)%'
+            $silencedTimezone: '%env(string:ALTER_SILENCED_TIMEZONE)%'
+            $silencedTimeFormat: '%env(string:ALTER_SILENCED_TIME_FORMAT)%'
 
     App\Command\ApiApplicationsCommand:
         arguments:

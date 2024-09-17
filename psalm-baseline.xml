@@ -8,6 +8,11 @@
       <code><![CDATA[\DateTimeImmutable::createFromFormat($this->dateFormat, $date, $timezone)]]></code>
     </FalsableReturnStatement>
   </file>
+  <file src="src/Service/AlertManager.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$this->silencedTimezone]]></code>
+    </ArgumentTypeCoercion>
+  </file>
   <file src="src/Service/ApiParser.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$this->fromTimeZone]]></code>
