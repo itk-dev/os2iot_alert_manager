@@ -10,6 +10,7 @@ See [keep a changelog] for information about writing changes to this log.
 
 ### Added
 
+- Added support for silencing alter using metadata on device and tags on gateways.
 - Added logging to check command.
 - Added SMS templates and service to alters
 - Added application last-seen checker.

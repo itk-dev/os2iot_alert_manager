@@ -10,6 +10,7 @@ use App\Model\Device;
 use App\Model\Gateway;
 use Carbon\Carbon;
 use ItkDev\MetricsBundle\Service\MetricsService;
+use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -26,6 +27,7 @@ final readonly class AlertManager
         private MailService $mailService,
         private MetricsService $metricsService,
         private TemplateService $templateService,
+        private LoggerInterface $logger,
         private bool $applicationCheckStartDate,
         private int $gatewayLimit,
         private string $gatewayFallbackMail,
@@ -38,6 +40,10 @@ final readonly class AlertManager
         private string $deviceMetadataFieldMail,
         private string $deviceMetadataFieldPhone,
         private string $deviceBaseUrl,
+        private string $gatewaySilencedTag,
+        private string $deviceMetadataFieldSilenced,
+        private string $silencedTimezone,
+        private string $silencedTimeFormat,
     ) {
         Carbon::setLocale('da_DK');
     }
@@ -76,7 +82,7 @@ final readonly class AlertManager
         $gateways = $this->apiClient->getGateways($filterOnStatus);
         foreach ($gateways as $gateway) {
             $diff = $this->timeDiffInSeconds($gateway->lastSeenAt, $now);
-            if ($diff >= $this->gatewayLimit) {
+            if ($diff >= $this->gatewayLimit && !$this->isGatewaySilenced($gateway)) {
                 // Gateway limit for last seen is reached.
                 if (!$noMail) {
                     $subject = sprintf(
@@ -220,7 +226,7 @@ final readonly class AlertManager
         // Check timeout.
         $limit = $device->metadata[$this->deviceMetadataFieldLimit] ?? $this->deviceFallbackLimit;
         $diff = $this->timeDiffInSeconds($device->latestReceivedMessage->sentTime, $now);
-        if ($diff >= $limit) {
+        if ($diff >= $limit && !$this->isDeviceSilenced($device)) {
             // Device limit for last seen is reached.
             if (!$noMail) {
                 $subject = sprintf(
@@ -391,5 +397,86 @@ final readonly class AlertManager
         }
 
         return false;
+    }
+
+    /**
+     * Check if a device is silenced.
+     *
+     * @param Gateway $gateway
+     *   The gateway object to check
+     *
+     * @return bool
+     *   Returns true if the gateway is silenced, otherwise false
+     *
+     * @throws \DateInvalidTimeZoneException
+     */
+    private function isGatewaySilenced(Gateway $gateway): bool
+    {
+        if (isset($gateway->tags[$this->gatewaySilencedTag])) {
+            return $this->isPasteDate('gateway', $gateway->id, $gateway->tags[$this->gatewaySilencedTag]);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if a device is silenced.
+     *
+     * @param Device $device
+     *   The device object to check
+     *
+     * @return bool
+     *   Returns true if the device is silenced, otherwise false
+     *
+     * @throws \DateInvalidTimeZoneException
+     */
+    private function isDeviceSilenced(Device $device): bool
+    {
+        if (isset($device->metadata[$this->deviceMetadataFieldSilenced])) {
+            return $this->isPasteDate('device', $device->id, $device->metadata[$this->deviceMetadataFieldSilenced]);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if a given date has already passed.
+     *
+     * @param string $type
+     *   Type associated with the date (used for logging)
+     * @param int $id
+     *   Identifier associated with the date (used for logging)
+     * @param string $strDate
+     *   The date string to check, formatted according to $this->silencedTimeFormat
+     *
+     * @return bool
+     *   True if the date has passed, false otherwise
+     *
+     * @throws \DateInvalidTimeZoneException
+     */
+    private function isPasteDate(string $type, int $id, string $strDate): bool
+    {
+        $timezone = new \DateTimeZone($this->silencedTimezone);
+        $date = \DateTimeImmutable::createFromFormat($this->silencedTimeFormat, $strDate, $timezone);
+        if (false === $date) {
+            $errorMsg = '';
+            $errors = \DateTime::getLastErrors();
+            if (is_array($errors)) {
+                foreach ($errors['errors'] as $error) {
+                    $errorMsg .= $error.PHP_EOL;
+                }
+            }
+            $this->logger->error(sprintf('Silenced error at %s (%d):, %s', $type, $id, $errorMsg));
+            $this->metricsService->counter(
+                name: 'alter_silenced_parse_date_error_total',
+                help: 'The total number of date parsing exceptions',
+                labels: ['type' => 'exception']
+            );
+
+            // Default to false, better get extra alter then non.
+            return false;
+        }
+
+        return time() >= $date->getTimestamp();
     }
 }

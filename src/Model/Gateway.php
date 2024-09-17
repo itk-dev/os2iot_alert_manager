@@ -20,6 +20,7 @@ final readonly class Gateway
         public ?string $responsibleName,
         public ?string $responsibleEmail,
         public ?string $responsiblePhone,
+        public array $tags,
     ) {
     }
 }

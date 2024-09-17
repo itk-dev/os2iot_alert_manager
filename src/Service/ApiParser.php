@@ -196,6 +196,7 @@ final readonly class ApiParser
                 responsibleName: $gateway['gatewayResponsibleName'],
                 responsibleEmail: $gateway['gatewayResponsibleEmail'],
                 responsiblePhone: $gateway['gatewayResponsiblePhoneNumber'],
+                tags: $gateway['tags'],
             );
         }
 
