@@ -5,3 +5,7 @@ services:
       - app
     ports:
       - '6379'
+
+  nginx:
+    deploy:
+      replicas: 0

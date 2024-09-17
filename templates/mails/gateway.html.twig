@@ -1,6 +1,7 @@
-<p>Der har ikke været kontakt til {{ gateway.name }} i {{ since.hours }} timer og {{ since.minutes }} minutter.</p>
+<p>Der var sidste gang kontakt til "{{ gateway.name }}" {{ ago }}.</p>
 
 <p>Seneste kontakt var <strong>{{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}.</strong></p>
+
 <p>Årsagerne kan være strømsvigt, manglende netværksdækning eller at udstyret skal genstartes.</p>
 
 <p><strong>Gateway information</strong></p>

@@ -1,7 +1,8 @@
-Der har ikke været kontakt til {{ gateway.name }} i i {{ since.hours }} timer og {{ since.minutes }} minutter.
+Der var sidste gang kontakt til "{{ gateway.name }}" {{ ago }}.
 
-Seneste kontakt var {{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}. Årsagerne kan
-være strømsvigt, manglende netværksdækning eller at udstyret skal genstartes.
+Seneste kontakt var {{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}.
+
+Årsagerne kan være strømsvigt, manglende netværksdækning eller at udstyret skal genstartes.
 
 --------------------------------------------------------------------------------
 Gateway information

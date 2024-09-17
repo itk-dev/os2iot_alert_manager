@@ -8,6 +8,7 @@ use App\Exception\SmsException;
 use App\Model\Application;
 use App\Model\Device;
 use App\Model\Gateway;
+use Carbon\Carbon;
 use ItkDev\MetricsBundle\Service\MetricsService;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -38,6 +39,7 @@ final readonly class AlertManager
         private string $deviceMetadataFieldPhone,
         private string $deviceBaseUrl,
     ) {
+        Carbon::setLocale('da_DK');
     }
 
     /**
@@ -87,10 +89,7 @@ final readonly class AlertManager
                         context: [
                             'gateway' => $gateway,
                             'diff' => $diff,
-                            'since' => [
-                                'hours' => floor($diff / 3600),
-                                'minutes' => floor(($diff % 3600) / 60),
-                            ],
+                            'ago' => Carbon::createFromImmutable($gateway->lastSeenAt)->diffForHumans(parts: 4),
                             'url' => $this->gatewayBaseUrl.$gateway->gatewayId,
                         ],
                         subject: $subject,
@@ -105,10 +104,7 @@ final readonly class AlertManager
                         to: [$this->findGatewayPhone($gateway, $overridePhone)],
                         message: $this->templateService->renderTemplate('sms/gateway.twig', [
                             'gateway' => $gateway,
-                            'since' => [
-                                'hours' => floor($diff / 3600),
-                                'minutes' => floor(($diff % 3600) / 60),
-                            ],
+                            'ago' => Carbon::createFromImmutable($gateway->lastSeenAt)->diffForHumans(parts: 4),
                             'url' => $this->gatewayBaseUrl.$gateway->gatewayId,
                         ])
                     );
@@ -124,6 +120,8 @@ final readonly class AlertManager
     }
 
     /**
+     * Check applications.
+     *
      * @param \DateTimeImmutable $now
      *   Relative time to check against
      * @param bool $filterOnStatus
@@ -234,10 +232,7 @@ final readonly class AlertManager
                     to: $this->findDeviceToMailAddress($device, $application, $overrideMail),
                     context: [
                         'device' => $device,
-                        'since' => [
-                            'hours' => floor($diff / 3600),
-                            'minutes' => floor(($diff % 3600) / 60),
-                        ],
+                        'ago' => Carbon::createFromImmutable($device->latestReceivedMessage->sentTime)->diffForHumans(parts: 4),
                         'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
                     ],
                     subject: $subject,
@@ -250,12 +245,9 @@ final readonly class AlertManager
             if (!$noSms) {
                 $this->smsClient->send(
                     to: [$this->findDevicePhone($device, $application, $overridePhone)],
-                    message: $this->templateService->renderTemplate('sms/gateway.twig', [
+                    message: $this->templateService->renderTemplate('sms/device.twig', [
                         'device' => $device,
-                        'since' => [
-                            'hours' => floor($diff / 3600),
-                            'minutes' => floor(($diff % 3600) / 60),
-                        ],
+                        'ago' => Carbon::createFromImmutable($device->latestReceivedMessage->sentTime)->diffForHumans(parts: 4),
                         'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
                     ])
                 );
@@ -300,7 +292,11 @@ final readonly class AlertManager
             return $overrideMail;
         }
 
-        return empty($gateway->responsibleEmail) ? $this->gatewayFallbackMail : $gateway->responsibleEmail;
+        $addresses = empty($gateway->responsibleEmail) ? $this->gatewayFallbackMail : $gateway->responsibleEmail;
+        $addresses = explode(',', $addresses);
+        $addresses = array_map('trim', $addresses);
+
+        return reset($addresses);
     }
 
     /**
@@ -322,7 +318,11 @@ final readonly class AlertManager
             return $overrideMail;
         }
 
-        return empty($device->metadata[$this->deviceMetadataFieldMail]) ? ($application->contactEmail ?? $this->deviceFallbackMail) : $device->metadata[$this->deviceMetadataFieldMail];
+        $addresses = empty($device->metadata[$this->deviceMetadataFieldMail]) ? ($application->contactEmail ?? $this->deviceFallbackMail) : $device->metadata[$this->deviceMetadataFieldMail];
+        $addresses = explode(',', $addresses);
+        $addresses = array_map('trim', $addresses);
+
+        return reset($addresses);
     }
 
     /**

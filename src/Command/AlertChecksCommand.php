@@ -2,13 +2,25 @@
 
 namespace App\Command;
 
+use App\Exception\MailException;
+use App\Exception\ParsingException;
+use App\Exception\SmsException;
 use App\Service\AlertManager;
+use ItkDev\MetricsBundle\Service\MetricsService;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 #[AsCommand(
     name: 'app:alert:checks',
@@ -20,6 +32,8 @@ class AlertChecksCommand extends Command
 
     public function __construct(
         private readonly AlertManager $alertManager,
+        private readonly LoggerInterface $logger,
+        private readonly MetricsService $metricsService,
         private readonly string $timezone,
         private readonly array $statuses,
     ) {
@@ -40,6 +54,7 @@ class AlertChecksCommand extends Command
             ->addOption('filter-status', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
             ->addOption('override-mail', null, InputOption::VALUE_REQUIRED, 'Override address to send mails to')
             ->addOption('override-phone', null, InputOption::VALUE_REQUIRED, 'Override phone number to send messages to')
+            ->addOption('debug', null, InputOption::VALUE_NONE, 'Enable debug mode')
         ;
     }
 
@@ -51,41 +66,94 @@ class AlertChecksCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        // Get options.
+        $all = $input->getOption('all');
         $date = $input->getOption('date');
-        $onlyApps = $input->getOption('only-applications');
-        $onlyGateways = $input->getOption('only-gateways');
-        $onlyDevice = $input->getOption('only-device');
+        $debug = $input->getOption('debug');
         $deviceId = (int) $input->getOption('device-id');
         $filter = $input->getOption('filter-status');
+        $noMail = $input->getOption('no-mails');
+        $noSms = $input->getOption('no-sms');
+        $onlyApps = $input->getOption('only-applications');
+        $onlyDevice = $input->getOption('only-device');
+        $onlyGateways = $input->getOption('only-gateways');
         $overrideMail = (string) $input->getOption('override-mail');
         $overridePhone = (string) $input->getOption('override-phone');
-        $noMail = $input->getOption('no-mail');
-        $noSms = $input->getOption('no-sms');
 
-        // @todo:
-        $all = $input->getOption('all');
+        $this->metricsService->counter(
+            name: 'command_checks_started_total',
+            help: 'Command checks started total',
+            labels: ['type' => 'info']
+        );
 
-        $now = $this->getDate($date);
-        $output->writeln(sprintf('<info>The date used for checking: %s</info>', $now->format($this->dateFormat)));
+        try {
+            $now = $this->getDate($date);
+            $output->writeln(sprintf('<info>The date used for checking: %s</info>', $now->format($this->dateFormat)));
+        } catch (\DateInvalidTimeZoneException|\DateMalformedStringException $e) {
+            $this->log('DateError', $e, $debug);
 
-        if ($onlyApps || $all) {
-            $this->alertManager->checkApplications($now, $filter, $overrideMail, $overridePhone, noMail: $noMail, noSms: $noSms);
+            return Command::FAILURE;
         }
 
-        if ($onlyGateways || $all) {
-            $this->alertManager->checkGateways($now, $filter, $overrideMail, $overridePhone, noMail: $noMail, noSms: $noSms);
-        }
-
-        if ($onlyDevice || $all) {
-            if (-1 === $deviceId) {
-                $io->error('Device id is required');
-
-                return Command::FAILURE;
+        try {
+            if ($onlyApps || $all) {
+                $this->alertManager->checkApplications($now, $filter, $overrideMail, $overridePhone, noMail: $noMail, noSms: $noSms);
             }
-            $this->alertManager->checkDevice($now, $deviceId, overrideMail: $overrideMail, overridePhone: $overridePhone, noMail: $noMail, noSms: $noSms);
+
+            if ($onlyGateways || $all) {
+                $this->alertManager->checkGateways($now, $filter, $overrideMail, $overridePhone, noMail: $noMail, noSms: $noSms);
+            }
+
+            if ($onlyDevice) {
+                if (-1 === $deviceId) {
+                    $io->error('Device id is required');
+
+                    return Command::FAILURE;
+                }
+                $this->alertManager->checkDevice($now, $deviceId, overrideMail: $overrideMail, overridePhone: $overridePhone, noMail: $noMail, noSms: $noSms);
+            }
+        } catch (MailException|ParsingException|SmsException|\DateInvalidTimeZoneException|\DateMalformedStringException|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface|LoaderError|RuntimeError|SyntaxError $e) {
+            $this->log('CheckError', $e, $debug);
+
+            return Command::FAILURE;
         }
+
+        $this->metricsService->counter(
+            name: 'command_checks_completed_total',
+            help: 'Command checks completed total',
+            labels: ['type' => 'info']
+        );
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Handle error.
+     *
+     * @param string $checkType
+     *   The type of check that triggered the issue
+     * @param \Throwable $t
+     *   The exception caught
+     * @param bool $debug
+     *   If debug re-throws the exception
+     *
+     * @throws \Throwable
+     */
+    private function log(string $checkType, \Throwable $t, bool $debug = false): void
+    {
+        $msg = sprintf('%s ,type: %s, message: "%s"', $checkType, get_class($t), $t->getMessage());
+        $this->logger->error($msg);
+        $this->metricsService->counter(
+            name: 'command_checks_error_total',
+            help: 'Command checks errors/exceptions in total',
+            labels: ['type' => 'exception']
+        );
+
+        if ($debug) {
+            // Debug re-throw exception.
+            throw $t;
+        }
     }
 
     /**

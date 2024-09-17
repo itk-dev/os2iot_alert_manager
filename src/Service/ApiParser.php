@@ -137,7 +137,7 @@ final readonly class ApiParser
             createdAt: $this->parseDate($data['createdAt']),
             updatedAt: $this->parseDate($data['createdAt']),
             name: $data['name'],
-            location: $this->parseLocation($data['location']),
+            location: $data['location'] ? $this->parseLocation($data['location']) : $this->parseLocation(['latitude' => 0, 'longitude' => 0]),
             latestReceivedMessage: $data['latestReceivedMessage'] ? $this->parseMessage($data['latestReceivedMessage']) : null,
             statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
             metadata: $this->parseMetadata($data['metadata'] ?? '[]'),
