@@ -160,7 +160,7 @@ final readonly class ApiParser
      * @param bool $filterOnStatus
      *   Determines whether to filter out applications with a status not in the configuration
      *
-     * @return array
+     * @return array<Gateway>
      *   An array of parsed gateway information objects
      *
      * @throws ParsingException

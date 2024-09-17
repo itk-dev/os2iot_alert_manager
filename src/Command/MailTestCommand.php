@@ -41,7 +41,6 @@ class MailTestCommand extends Command
         $date = new \DateTimeImmutable(timezone: new \DateTimeZone('Europe/Copenhagen'));
         $date = $date->modify('-1 hour');
 
-
         $this->mailService->sendEmail(
             to: $to,
             context: [

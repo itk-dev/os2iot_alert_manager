@@ -38,11 +38,15 @@ class AlertChecksCommand extends Command
             ->addOption('only-mails', null, InputOption::VALUE_NONE, 'Only send mails')
             ->addOption('only-sms', null, InputOption::VALUE_NONE, 'Only send sms')
             ->addOption('filter-status', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
+            ->addOption('override-mail', null, InputOption::VALUE_REQUIRED, 'Override address to send mails to')
+            ->addOption('override-phone', null, InputOption::VALUE_REQUIRED, 'Override phone number to send messages to')
         ;
     }
 
     /**
      * @todo: Added exception handling and metrics to log errors.
+     *
+     * @todo: Added metrics on start/completed run.
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -53,16 +57,18 @@ class AlertChecksCommand extends Command
         $onlyDevice = $input->getOption('only-device');
         $deviceId = (int) $input->getOption('device-id');
         $filter = $input->getOption('filter-status');
+        $overrideMail = (string) $input->getOption('override-mail');
+        $overridePhone = (string) $input->getOption('override-phone');
 
         $now = $this->getDate($date);
         $output->writeln(sprintf('<info>The date used for checking: %s</info>', $now->format($this->dateFormat)));
 
         if ($onlyApps) {
-            $this->alertManager->checkApplications($now, $filter);
+            $this->alertManager->checkApplications($now, $filter, $overrideMail, $overridePhone);
         }
 
         if ($onlyGateways) {
-            $this->alertManager->checkGateways($now, $filter);
+            $this->alertManager->checkGateways($now, $filter, $overrideMail, $overridePhone);
         }
 
         if ($onlyDevice) {
@@ -71,7 +77,7 @@ class AlertChecksCommand extends Command
 
                 return Command::FAILURE;
             }
-            $this->alertManager->checkDevice($now, $deviceId);
+            $this->alertManager->checkDevice($now, $deviceId, null, $overrideMail, $overridePhone);
         }
 
         return Command::SUCCESS;

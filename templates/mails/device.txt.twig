@@ -35,4 +35,4 @@ Placering: {% include 'mails/map_link.txt.twig' with { 'latitude': rxInfo.locati
 
 {% include 'mails/location.txt.twig' with { 'type': 'Enheden', 'latitude': device.location.latitude, 'longitude': device.location.longitude } %}
 
-<p>Du kan se opsætningen af enheden på: <a href="{{ url }}">{{ url }}</a></p>
+Du kan se opsætningen af enheden på {{ url }}

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Exception\ParsingException;
 use App\Model\Application;
 use App\Model\Device;
+use App\Model\Gateway;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -107,7 +108,7 @@ final readonly class ApiClient
      * @param bool $filterOnStatus
      *   Indicates whether to filter gateways based on a specific status
      *
-     * @return array
+     * @return array<Gateway>
      *   An array of parsed gateways
      *
      * @throws ParsingException

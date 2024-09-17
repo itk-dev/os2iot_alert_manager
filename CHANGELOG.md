@@ -10,6 +10,9 @@ See [keep a changelog] for information about writing changes to this log.
 
 ### Added
 
+- Added SMS templates and service to alters
+- Added application last-seen checker.
+- Added device last-seen checker.
 - Added Gateway last-seen checker.
 - Added mail service and templates for mails.
 - Added SMS gateway and command to send test SMS.
