@@ -13,7 +13,7 @@ final readonly class Device
         public \DateTimeImmutable $updatedAt,
         public string $name,
         public Location $location,
-        public Message $latestReceivedMessage,
+        public ?Message $latestReceivedMessage,
         public float $statusBattery,
         public array $metadata,
     ) {

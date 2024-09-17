@@ -26,14 +26,14 @@ class ApiApplicationsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
+            ->addOption('filter-status', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $filter = $input->getOption('filterStatus');
+        $filter = $input->getOption('filter-status');
 
         $apps = $this->apiClient->getApplications($filter);
 

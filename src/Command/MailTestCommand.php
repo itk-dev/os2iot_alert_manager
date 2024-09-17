@@ -27,7 +27,7 @@ class MailTestCommand extends Command
     {
         $this
             ->addArgument('to', InputArgument::REQUIRED, 'The phone number to send SMS to')
-            ->addOption('conte', 'm', InputOption::VALUE_REQUIRED, 'Message to send', 'This is an IoT alter manager test')
+            ->addOption('message', 'm', InputOption::VALUE_REQUIRED, 'Message to send', 'This is an IoT alter manager test')
         ;
     }
 
@@ -35,10 +35,12 @@ class MailTestCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $to = $input->getArgument('to');
+        $msg = $input->getOption('message');
 
         // @TODO: support for sending the different mail types as test.
         $date = new \DateTimeImmutable(timezone: new \DateTimeZone('Europe/Copenhagen'));
         $date = $date->modify('-1 hour');
+
 
         $this->mailService->sendEmail(
             to: $to,
@@ -46,7 +48,7 @@ class MailTestCommand extends Command
                 'name' => '"TEST TEST"',
                 'seenAgo' => '3600',
                 'lastSeenDate' => $date,
-                'description' => 'Dette er en test beskrivelse',
+                'description' => $msg,
                 'location' => [
                     'latitude' => 56.153540,
                     'longitude' => 10.214136,

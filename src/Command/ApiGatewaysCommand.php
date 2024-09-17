@@ -26,7 +26,7 @@ class ApiGatewaysCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
+            ->addOption('filter-status', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
             ->addOption('id', null, InputOption::VALUE_REQUIRED, 'Show details for gateway with this ID', -1)
         ;
     }
@@ -34,7 +34,7 @@ class ApiGatewaysCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $filter = $input->getOption('filterStatus');
+        $filter = $input->getOption('filter-status');
         $id = (int) $input->getOption('id');
 
         $gateways = $this->apiClient->getGateways($filter);

@@ -37,7 +37,7 @@ class AlertChecksCommand extends Command
             ->addOption('device-id', null, InputOption::VALUE_REQUIRED, 'Id of the device to check - requires --only-device option', -1)
             ->addOption('only-mails', null, InputOption::VALUE_NONE, 'Only send mails')
             ->addOption('only-sms', null, InputOption::VALUE_NONE, 'Only send sms')
-            ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
+            ->addOption('filter-status', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
         ;
     }
 
@@ -52,7 +52,7 @@ class AlertChecksCommand extends Command
         $onlyGateways = $input->getOption('only-gateways');
         $onlyDevice = $input->getOption('only-device');
         $deviceId = (int) $input->getOption('device-id');
-        $filter = $input->getOption('filterStatus');
+        $filter = $input->getOption('filter-status');
 
         $now = $this->getDate($date);
         $output->writeln(sprintf('<info>The date used for checking: %s</info>', $now->format($this->dateFormat)));

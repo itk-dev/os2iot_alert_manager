@@ -137,7 +137,7 @@ final readonly class ApiParser
             updatedAt: $this->parseDate($data['createdAt']),
             name: $data['name'],
             location: $this->parseLocation($data['location']),
-            latestReceivedMessage: $this->parseMessage($data['latestReceivedMessage']),
+            latestReceivedMessage: $data['latestReceivedMessage'] ? $this->parseMessage($data['latestReceivedMessage']) : null,
             statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
             metadata: $this->parseMetadata($data['metadata'] ?? '[]'),
         );
@@ -288,9 +288,9 @@ final readonly class ApiParser
             id: (int) $data['id'],
             createdAt: $this->parseDate($data['createdAt']),
             sentTime: $this->parseDate($data['sentTime']),
-            rssi: $data['rssi'],
-            snr: $data['snr'],
-            rxInfo: $this->parseRxInfo($data['rawData']['rxInfo']),
+            rssi: $data['rssi'] ?? 0,
+            snr: $data['snr'] ?? 0,
+            rxInfo: isset($data['rawData']['rxInfo']) ? $this->parseRxInfo($data['rawData']['rxInfo']) : [],
         );
     }
 
@@ -311,10 +311,10 @@ final readonly class ApiParser
 
         foreach ($data as $rxInfo) {
             $info[] = new ReceivedInfo(
-                gatewayId: $rxInfo['gatewayId'],
-                rssi: $rxInfo['rssi'],
-                snr: $rxInfo['snr'],
-                crcStatus: $rxInfo['crcStatus'],
+                gatewayId: $rxInfo['gatewayId'] ?? $rxInfo['gatewayID'],
+                rssi: $rxInfo['rssi'] ?? 0,
+                snr: $rxInfo['snr'] ?? ($rxInfo['loRaSNR'] ?? 0),
+                crcStatus: $rxInfo['crcStatus'] ?? 'Unknown',
                 location: $this->parseLocation($rxInfo['location']),
             );
         }

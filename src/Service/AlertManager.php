@@ -6,6 +6,7 @@ use App\Exception\MailException;
 use App\Exception\ParsingException;
 use App\Model\Application;
 use App\Model\Gateway;
+use ItkDev\MetricsBundle\Service\MetricsService;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -17,6 +18,7 @@ final readonly class AlertManager
         private ApiClient $apiClient,
         private SmsClient $smsClient,
         private MailService $mailService,
+        private MetricsService $metricsService,
         private bool $applicationCheckStartDate,
         private int $gatewayLimit,
         private string $gatewayFallbackMail,
@@ -100,6 +102,17 @@ final readonly class AlertManager
     {
         $device = $this->apiClient->getDevice($deviceId);
 
+        // No message sent from a device, hence no last sent to calculate diff
+        // from.
+        if (is_null($device->latestReceivedMessage)) {
+            $this->metricsService->counter(
+                name: 'alter_message_missing_total',
+                help: 'Device is missing latest received message',
+                labels: [ 'type' => 'info', 'id' => $device->id]
+            );
+            return;
+        }
+
         // Check timeout.
         $limit = $device->metadata[$this->deviceMetadataFieldLimit] ?? $this->deviceFallbackLimit;
         $diff = $this->timeDiffInSeconds($device->latestReceivedMessage->sentTime, $now);
@@ -121,7 +134,7 @@ final readonly class AlertManager
                         'hours' => floor($diff / 3600),
                         'minutes' => floor(($diff % 3600) / 60),
                     ],
-                    'url' => $application?->id ? sprintf($this->deviceBaseUrl, $application->id, $device->id) : null,
+                    'url' => !is_null($application) ? sprintf($this->deviceBaseUrl, $application->id, $device->id) : null,
                 ],
                 subject: $subject,
                 htmlTemplate: 'device.html.twig',
