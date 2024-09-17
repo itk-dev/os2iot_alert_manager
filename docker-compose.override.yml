@@ -13,3 +13,7 @@ services:
   nginx:
     deploy:
       replicas: 0
+
+  mariadb:
+    deploy:
+      replicas: 0
