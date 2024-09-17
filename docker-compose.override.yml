@@ -5,3 +5,11 @@ services:
       - app
     ports:
       - '6379'
+
+  mail:
+    environment:
+      - MP_MAX_MESSAGES=10000
+
+  nginx:
+    deploy:
+      replicas: 0

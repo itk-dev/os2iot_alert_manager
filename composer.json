@@ -12,6 +12,7 @@
         "cerbero/json-parser": "^1.1",
         "giggsey/libphonenumber-for-php": "^8.13",
         "itk-dev/metrics-bundle": "^1.1",
+        "nesbot/carbon": "^3.8",
         "symfony/console": "7.1.*",
         "symfony/dotenv": "7.1.*",
         "symfony/flex": "^2",
