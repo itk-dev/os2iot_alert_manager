@@ -16,7 +16,8 @@ Enhedsinformation
 --------------------------------------------------------------------------------
 Navn: {{ device.name }}
 ID: {{ device.id }}
-Battery: {{ device.statusBattery|number_format(2, ',', '') }}
+Battery: {% if device.statusBattery == -1 %}N/A{% else %}{{ device.statusBattery|number_format(2, ',', '') }}{% endif %}
+
 RSSI: {{ device.latestReceivedMessage.rssi }}
 SNR: {{ device.latestReceivedMessage.snr  }}
 
@@ -34,6 +35,4 @@ Placering: {% include 'mails/map_link.txt.twig' with { 'latitude': rxInfo.locati
 
 {% include 'mails/location.txt.twig' with { 'type': 'Enheden', 'latitude': device.location.latitude, 'longitude': device.location.longitude } %}
 
-{% if url is not null %}
 <p>Du kan se opsætningen af enheden på: <a href="{{ url }}">{{ url }}</a></p>
-{% endif %}

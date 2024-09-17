@@ -133,6 +133,7 @@ final readonly class ApiParser
 
         $device = new Device(
             id: $data['id'],
+            applicationId: $data['application']['id'],
             createdAt: $this->parseDate($data['createdAt']),
             updatedAt: $this->parseDate($data['createdAt']),
             name: $data['name'],
@@ -270,7 +271,7 @@ final readonly class ApiParser
     }
 
     /**
-     * Parse lastest received message.
+     * Parse the latest received message.
      *
      * @param array $data
      *   The raw latestReceivedMessage data from the API

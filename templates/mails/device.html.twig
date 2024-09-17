@@ -26,7 +26,11 @@
     </tr>
     <tr>
         <td>Battery:</td>
+        {% if device.statusBattery == -1 %}
+        <td>N/A</td>
+        {% else %}
         <td style="color: {% if device.statusBattery > 50 %}green{% elseif device.statusBattery < 20 %}red{% else %}black{% endif %};">{{ device.statusBattery|number_format(2, ',', '') }}</td>
+        {% endif %}
     </tr>
     <tr>
         <td>RSSI:</td>
@@ -67,8 +71,6 @@
 
 {% include 'mails/location.html.twig' with { 'type': 'Enheden', 'latitude': device.location.latitude, 'longitude': device.location.longitude } %}
 
-{% if url is not null %}
 <p>Du kan se opsætningen af enheden på: <a href="{{ url }}">{{ url }}</a></p>
-{% endif %}
 
 {% include 'mails/logo.html.twig' %}

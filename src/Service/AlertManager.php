@@ -134,7 +134,7 @@ final readonly class AlertManager
                         'hours' => floor($diff / 3600),
                         'minutes' => floor(($diff % 3600) / 60),
                     ],
-                    'url' => !is_null($application) ? sprintf($this->deviceBaseUrl, $application->id, $device->id) : null,
+                    'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
                 ],
                 subject: $subject,
                 htmlTemplate: 'device.html.twig',

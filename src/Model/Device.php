@@ -9,6 +9,7 @@ final readonly class Device
 {
     public function __construct(
         public int $id,
+        public int $applicationId,
         public \DateTimeImmutable $createdAt,
         public \DateTimeImmutable $updatedAt,
         public string $name,
