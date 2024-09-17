@@ -35,8 +35,8 @@ class AlertChecksCommand extends Command
             ->addOption('only-gateways', null, InputOption::VALUE_NONE, 'Only check gateways')
             ->addOption('only-device', null, InputOption::VALUE_NONE, 'Only check devices - requires the --device-id option')
             ->addOption('device-id', null, InputOption::VALUE_REQUIRED, 'Id of the device to check - requires --only-device option', -1)
-            ->addOption('only-mails', null, InputOption::VALUE_NONE, 'Only send mails')
-            ->addOption('only-sms', null, InputOption::VALUE_NONE, 'Only send sms')
+            ->addOption('no-mails', null, InputOption::VALUE_NONE, 'Do not send mails')
+            ->addOption('no-sms', null, InputOption::VALUE_NONE, 'Do not send sms')
             ->addOption('filter-status', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
             ->addOption('override-mail', null, InputOption::VALUE_REQUIRED, 'Override address to send mails to')
             ->addOption('override-phone', null, InputOption::VALUE_REQUIRED, 'Override phone number to send messages to')
@@ -59,25 +59,30 @@ class AlertChecksCommand extends Command
         $filter = $input->getOption('filter-status');
         $overrideMail = (string) $input->getOption('override-mail');
         $overridePhone = (string) $input->getOption('override-phone');
+        $noMail = $input->getOption('no-mail');
+        $noSms = $input->getOption('no-sms');
+
+        // @todo:
+        $all = $input->getOption('all');
 
         $now = $this->getDate($date);
         $output->writeln(sprintf('<info>The date used for checking: %s</info>', $now->format($this->dateFormat)));
 
-        if ($onlyApps) {
-            $this->alertManager->checkApplications($now, $filter, $overrideMail, $overridePhone);
+        if ($onlyApps || $all) {
+            $this->alertManager->checkApplications($now, $filter, $overrideMail, $overridePhone, noMail: $noMail, noSms: $noSms);
         }
 
-        if ($onlyGateways) {
-            $this->alertManager->checkGateways($now, $filter, $overrideMail, $overridePhone);
+        if ($onlyGateways || $all) {
+            $this->alertManager->checkGateways($now, $filter, $overrideMail, $overridePhone, noMail: $noMail, noSms: $noSms);
         }
 
-        if ($onlyDevice) {
+        if ($onlyDevice || $all) {
             if (-1 === $deviceId) {
                 $io->error('Device id is required');
 
                 return Command::FAILURE;
             }
-            $this->alertManager->checkDevice($now, $deviceId, null, $overrideMail, $overridePhone);
+            $this->alertManager->checkDevice($now, $deviceId, overrideMail: $overrideMail, overridePhone: $overridePhone, noMail: $noMail, noSms: $noSms);
         }
 
         return Command::SUCCESS;

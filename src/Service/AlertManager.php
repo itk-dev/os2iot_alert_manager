@@ -2,10 +2,20 @@
 
 namespace App\Service;
 
+use App\Exception\MailException;
+use App\Exception\ParsingException;
+use App\Exception\SmsException;
 use App\Model\Application;
 use App\Model\Device;
 use App\Model\Gateway;
 use ItkDev\MetricsBundle\Service\MetricsService;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 final readonly class AlertManager
 {
@@ -30,51 +40,117 @@ final readonly class AlertManager
     ) {
     }
 
-    public function checkGateways(\DateTimeImmutable $now, bool $filterOnStatus = true, string $overrideMail = '', string $overridePhone = ''): void
+    /**
+     * Check the gateways.
+     *
+     * @param \DateTimeImmutable $now
+     *   Relative time to check against
+     * @param bool $filterOnStatus
+     *   Filter based on the status given in configuration
+     * @param string $overrideMail
+     *   Override the mail-address from the API with this address
+     * @param string $overridePhone
+     *  Override the phone number from the API with this number
+     * @param bool $noMail
+     *   Do not send mails
+     * @param bool $noSms
+     *   Do not send SMSs
+     *
+     * @throws MailException
+     * @throws ParsingException
+     * @throws SmsException
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
+    public function checkGateways(\DateTimeImmutable $now, bool $filterOnStatus = true, string $overrideMail = '', string $overridePhone = '', bool $noMail = false, bool $noSms = false): void
     {
         $gateways = $this->apiClient->getGateways($filterOnStatus);
         foreach ($gateways as $gateway) {
             $diff = $this->timeDiffInSeconds($gateway->lastSeenAt, $now);
             if ($diff >= $this->gatewayLimit) {
-                $subject = sprintf(
-                    'Gateway "%s" offline siden %s',
-                    $gateway->name,
-                    $gateway->lastSeenAt->format('d-m-y H:i:s')
-                );
                 // Gateway limit for last seen is reached.
-                $this->mailService->sendEmail(
-                    to: $this->findGatewayToMailAddress($gateway, $overrideMail),
-                    context: [
-                        'gateway' => $gateway,
-                        'diff' => $diff,
-                        'since' => [
-                            'hours' => floor($diff / 3600),
-                            'minutes' => floor(($diff % 3600) / 60),
+                if (!$noMail) {
+                    $subject = sprintf(
+                        'Gateway "%s" offline siden %s',
+                        $gateway->name,
+                        $gateway->lastSeenAt->format('d-m-y H:i:s')
+                    );
+                    $this->mailService->sendEmail(
+                        to: $this->findGatewayToMailAddress($gateway, $overrideMail),
+                        context: [
+                            'gateway' => $gateway,
+                            'diff' => $diff,
+                            'since' => [
+                                'hours' => floor($diff / 3600),
+                                'minutes' => floor(($diff % 3600) / 60),
+                            ],
+                            'url' => $this->gatewayBaseUrl.$gateway->gatewayId,
                         ],
-                        'url' => $this->gatewayBaseUrl.$gateway->gatewayId,
-                    ],
-                    subject: $subject,
-                    htmlTemplate: 'gateway.html.twig',
-                    textTemplate: 'gateway.txt.twig',
-                );
+                        subject: $subject,
+                        htmlTemplate: 'gateway.html.twig',
+                        textTemplate: 'gateway.txt.twig',
+                    );
+                }
 
                 // SMS
-                $this->smsClient->send(
-                    to: [$this->findGatewayPhone($gateway, $overridePhone)],
-                    message: $this->templateService->renderTemplate('sms/gateway.twig', [
-                        'gateway' => $gateway,
-                        'since' => [
-                            'hours' => floor($diff / 3600),
-                            'minutes' => floor(($diff % 3600) / 60),
-                        ],
-                        'url' => $this->gatewayBaseUrl.$gateway->gatewayId,
-                    ])
+                if (!$noSms) {
+                    $this->smsClient->send(
+                        to: [$this->findGatewayPhone($gateway, $overridePhone)],
+                        message: $this->templateService->renderTemplate('sms/gateway.twig', [
+                            'gateway' => $gateway,
+                            'since' => [
+                                'hours' => floor($diff / 3600),
+                                'minutes' => floor(($diff % 3600) / 60),
+                            ],
+                            'url' => $this->gatewayBaseUrl.$gateway->gatewayId,
+                        ])
+                    );
+                }
+
+                $this->metricsService->counter(
+                    name: 'alter_gateway_device_notification_tiggered_total',
+                    help: 'Total number of alters triggered for gateways',
+                    labels: ['type' => 'info']
                 );
             }
         }
     }
 
-    public function checkApplications(\DateTimeImmutable $now, bool $filterOnStatus = true, string $overrideMail = '', string $overridePhone = ''): void
+    /**
+     * @param \DateTimeImmutable $now
+     *   Relative time to check against
+     * @param bool $filterOnStatus
+     *   Filter based on the status given in configuration
+     * @param string $overrideMail
+     *   Override the mail-address from the API with this address
+     * @param string $overridePhone
+     *  Override the phone number from the API with this number
+     * @param bool $noMail
+     *   Do not send mails
+     * @param bool $noSms
+     *   Do not send SMSs
+     *
+     * @throws ClientExceptionInterface
+     * @throws MailException
+     * @throws ParsingException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws SmsException
+     * @throws TransportExceptionInterface
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
+    public function checkApplications(\DateTimeImmutable $now, bool $filterOnStatus = true, string $overrideMail = '', string $overridePhone = '', bool $noMail = false, bool $noSms = false): void
     {
         $apps = $this->apiClient->getApplications($filterOnStatus);
         foreach ($apps as $app) {
@@ -83,12 +159,51 @@ final readonly class AlertManager
             }
 
             foreach ($app->devices as $deviceId) {
-                $this->checkDevice($now, $deviceId, $app, $overrideMail, $overridePhone);
+                $this->checkDevice(
+                    now: $now,
+                    deviceId: $deviceId,
+                    application: $app,
+                    overrideMail: $overrideMail,
+                    overridePhone: $overridePhone,
+                    noMail: $noMail,
+                    noSms: $noSms,
+                );
             }
         }
     }
 
-    public function checkDevice(\DateTimeImmutable $now, int $deviceId, ?Application $application = null, string $overrideMail = '', string $overridePhone = ''): void
+    /**
+     * Check a device.
+     *
+     * @param \DateTimeImmutable $now
+     *   Relative time to check against
+     * @param int $deviceId
+     *   The id of the device to check
+     * @param Application|null $application
+     *   Application that holds the devices (if available)
+     * @param string $overrideMail
+     *   Override the mail-address from the API with this address
+     * @param string $overridePhone
+     *  Override the phone number from the API with this number
+     * @param bool $noMail
+     *   Do not send mails
+     * @param bool $noSms
+     *   Do not send SMSs
+     *
+     * @throws ClientExceptionInterface
+     * @throws MailException
+     * @throws ParsingException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws SmsException
+     * @throws TransportExceptionInterface
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
+    public function checkDevice(\DateTimeImmutable $now, int $deviceId, ?Application $application = null, string $overrideMail = '', string $overridePhone = '', bool $noMail = false, bool $noSms = false): void
     {
         $device = $this->apiClient->getDevice($deviceId);
 
@@ -108,38 +223,48 @@ final readonly class AlertManager
         $limit = $device->metadata[$this->deviceMetadataFieldLimit] ?? $this->deviceFallbackLimit;
         $diff = $this->timeDiffInSeconds($device->latestReceivedMessage->sentTime, $now);
         if ($diff >= $limit) {
-            $subject = sprintf(
-                'Enhed "%s" offline siden %s',
-                $device->name,
-                $device->latestReceivedMessage->sentTime->format('d-m-y H:i:s')
-            );
-            // Gateway limit for last seen is reached.
-            $this->mailService->sendEmail(
-                to: $this->findDeviceToMailAddress($device, $application, $overrideMail),
-                context: [
-                    'device' => $device,
-                    'since' => [
-                        'hours' => floor($diff / 3600),
-                        'minutes' => floor(($diff % 3600) / 60),
+            // Device limit for last seen is reached.
+            if (!$noMail) {
+                $subject = sprintf(
+                    'Enhed "%s" offline siden %s',
+                    $device->name,
+                    $device->latestReceivedMessage->sentTime->format('d-m-y H:i:s')
+                );
+                $this->mailService->sendEmail(
+                    to: $this->findDeviceToMailAddress($device, $application, $overrideMail),
+                    context: [
+                        'device' => $device,
+                        'since' => [
+                            'hours' => floor($diff / 3600),
+                            'minutes' => floor(($diff % 3600) / 60),
+                        ],
+                        'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
                     ],
-                    'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
-                ],
-                subject: $subject,
-                htmlTemplate: 'device.html.twig',
-                textTemplate: 'device.txt.twig',
-            );
+                    subject: $subject,
+                    htmlTemplate: 'device.html.twig',
+                    textTemplate: 'device.txt.twig',
+                );
+            }
 
             // SMS
-            $this->smsClient->send(
-                to: [$this->findDevicePhone($device, $application, $overridePhone)],
-                message: $this->templateService->renderTemplate('sms/gateway.twig', [
-                    'device' => $device,
-                    'since' => [
-                        'hours' => floor($diff / 3600),
-                        'minutes' => floor(($diff % 3600) / 60),
-                    ],
-                    'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
-                ])
+            if (!$noSms) {
+                $this->smsClient->send(
+                    to: [$this->findDevicePhone($device, $application, $overridePhone)],
+                    message: $this->templateService->renderTemplate('sms/gateway.twig', [
+                        'device' => $device,
+                        'since' => [
+                            'hours' => floor($diff / 3600),
+                            'minutes' => floor(($diff % 3600) / 60),
+                        ],
+                        'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
+                    ])
+                );
+            }
+
+            $this->metricsService->counter(
+                name: 'alter_device_notification_tiggered_total',
+                help: 'Total number of alters triggered for devices',
+                labels: ['type' => 'info']
             );
         }
     }

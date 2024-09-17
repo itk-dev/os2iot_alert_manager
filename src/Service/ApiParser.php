@@ -212,8 +212,6 @@ final readonly class ApiParser
     /**
      * Parse metadata.
      *
-     * @TODO: better parsing, when better metadata is available.
-     *
      * @param string $data
      *   Raw metadata from the API
      *
