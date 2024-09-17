@@ -24,7 +24,9 @@ class ApiDeviceCommand extends Command
 
     protected function configure(): void
     {
-        $this->addArgument('id', InputArgument::REQUIRED, 'The id of the device to fetch data for');
+        $this->
+            addArgument('id', InputArgument::REQUIRED, 'The id of the device to fetch data for')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

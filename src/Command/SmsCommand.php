@@ -12,8 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:sms:send',
-    description: 'Send SMS',
+    name: 'app:sms:test',
+    description: 'Send test SMS',
 )]
 class SmsCommand extends Command
 {

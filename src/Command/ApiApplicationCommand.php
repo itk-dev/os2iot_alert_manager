@@ -25,7 +25,8 @@ class ApiApplicationCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('id', InputArgument::REQUIRED, 'Application ID');
+            ->addArgument('id', InputArgument::REQUIRED, 'Application ID')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

@@ -2,9 +2,6 @@
 
 namespace App\Command;
 
-use App\Exception\MailException;
-use App\Exception\ParsingException;
-use App\Exception\SmsException;
 use App\Service\AlertManager;
 use ItkDev\MetricsBundle\Service\MetricsService;
 use Psr\Log\LoggerInterface;
@@ -14,13 +11,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 #[AsCommand(
     name: 'app:alert:checks',
@@ -90,8 +80,13 @@ class AlertChecksCommand extends Command
         try {
             $now = $this->getDate($date);
             $output->writeln(sprintf('<info>The date used for checking: %s</info>', $now->format($this->dateFormat)));
-        } catch (\DateInvalidTimeZoneException|\DateMalformedStringException $e) {
-            $this->log('DateError', $e, $debug);
+        } catch (\Throwable $t) {
+            $this->log('DateError', $t);
+
+            // Debug re-throw exception.
+            if ($debug) {
+                throw $t;
+            }
 
             return Command::FAILURE;
         }
@@ -113,8 +108,13 @@ class AlertChecksCommand extends Command
                 }
                 $this->alertManager->checkDevice($now, $deviceId, overrideMail: $overrideMail, overridePhone: $overridePhone, noMail: $noMail, noSms: $noSms);
             }
-        } catch (MailException|ParsingException|SmsException|\DateInvalidTimeZoneException|\DateMalformedStringException|ClientExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface|LoaderError|RuntimeError|SyntaxError $e) {
-            $this->log('CheckError', $e, $debug);
+        } catch (\Throwable $t) {
+            $this->log('CheckError', $t);
+
+            // Debug re-throw exception.
+            if ($debug) {
+                throw $t;
+            }
 
             return Command::FAILURE;
         }
@@ -135,12 +135,8 @@ class AlertChecksCommand extends Command
      *   The type of check that triggered the issue
      * @param \Throwable $t
      *   The exception caught
-     * @param bool $debug
-     *   If debug re-throws the exception
-     *
-     * @throws \Throwable
      */
-    private function log(string $checkType, \Throwable $t, bool $debug = false): void
+    private function log(string $checkType, \Throwable $t): void
     {
         $msg = sprintf('%s ,type: %s, message: "%s"', $checkType, get_class($t), $t->getMessage());
         $this->logger->error($msg);
@@ -149,11 +145,6 @@ class AlertChecksCommand extends Command
             help: 'Command checks errors/exceptions in total',
             labels: ['type' => 'exception']
         );
-
-        if ($debug) {
-            // Debug re-throw exception.
-            throw $t;
-        }
     }
 
     /**

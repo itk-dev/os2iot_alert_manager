@@ -37,7 +37,6 @@ class MailTestCommand extends Command
         $to = $input->getArgument('to');
         $msg = $input->getOption('message');
 
-        // @TODO: support for sending the different mail types as test.
         $date = new \DateTimeImmutable(timezone: new \DateTimeZone('Europe/Copenhagen'));
         $date = $date->modify('-1 hour');
 
