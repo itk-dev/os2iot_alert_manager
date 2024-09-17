@@ -22,9 +22,14 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Service\ApiClient:
+        arguments:
+            $gateWayOrgId: '%env(int:ALERT_GATEWAY_ORG_ID)%'
+            $apiRequestLimit: '%env(int:API_REQUEST_LIMIT)%'
+
     App\Service\ApiParser:
         arguments:
-            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
+            $statuses: '%env(csv:ALTER_STATUSES)%'
             $fromTimeZone: '%env(string:API_ORIGINAL_TIMEZONE)%'
             $timezone: '%env(string:API_TO_TIMEZONE)%'
             $timeformat: '%env(string:API_DATE_FORMAT)%'
@@ -42,10 +47,30 @@ services:
             $replyAddress: '%env(string:MAILS_REPLY_TO)%'
             $defaultAddress: '%env(string:MAILS_DEFAULT_TO)%'
 
+    App\Service\AlertManager:
+        arguments:
+            $applicationCheckStartDate: '%env(bool:ALTER_APPLICATION_CHECK_START_DATE)%'
+            $gatewayLimit: '%env(int:ALERT_GATEWAY_LIMIT)%'
+            $gatewayFallbackMail: '%env(string:ALERT_GATEWAY_FALLBACK_MAIL)%'
+            $gatewayFallbackPhone: '%env(string:ALERT_GATEWAY_FALLBACK_PHONE)%'
+            $gatewayBaseUrl: '%env(resolve:ALERT_GATEWAY_URL)%'
+            $deviceFallbackLimit: '%env(int:ALERT_DEVICE_FALLBACK_LIMIT)%'
+            $deviceFallbackMail: '%env(string:ALERT_DEVICE_FALLBACK_MAIL)%'
+            $deviceFallbackPhone: '%env(string:ALERT_DEVICE_FALLBACK_PHONE)%'
+            $deviceMetadataFieldLimit: '%env(ALTER_DEVICE_METADATA_THRESHOLD_FIELD)%'
+            $deviceMetadataFieldMail: '%env(ALERT_DEVICE_METADATA_MAIL_FIELD)%'
+            $deviceMetadataFieldPhone: '%env(ALTER_DEVICE_METADATA_PHONE_FIELD)%'
+            $deviceBaseUrl: '%env(resolve:ALERT_DEVICE_URL)%'
+
     App\Command\ApiApplicationsCommand:
         arguments:
-            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
+            $statuses: '%env(csv:ALTER_STATUSES)%'
 
     App\Command\ApiGatewaysCommand:
         arguments:
-            $applicationStatus: '%env(csv:ALTER_APPLICATION_STATUS)%'
+            $statuses: '%env(csv:ALTER_STATUSES)%'
+
+    App\Command\AlertChecksCommand:
+        arguments:
+            $timezone: '%env(string:API_TO_TIMEZONE)%'
+            $statuses: '%env(csv:ALTER_STATUSES)%'

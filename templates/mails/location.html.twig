@@ -1,0 +1,4 @@
+<p>{{ type }} er registreret til at være placeret i punktet {{ latitude }}, {{ longitude }}
+    <br /><br />
+    Se placering på {% include 'mails/map_link.html.twig' with { 'latitude': latitude, 'longitude': longitude } %}
+</p>

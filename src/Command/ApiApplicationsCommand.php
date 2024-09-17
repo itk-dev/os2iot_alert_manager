@@ -18,7 +18,7 @@ class ApiApplicationsCommand extends Command
 {
     public function __construct(
         private readonly ApiClient $apiClient,
-        private readonly array $applicationStatus,
+        private readonly array $statuses,
     ) {
         parent::__construct();
     }
@@ -26,14 +26,14 @@ class ApiApplicationsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('filterStatus', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->applicationStatus))
+            ->addOption('filter-status', null, InputOption::VALUE_NONE, 'Filter based on configured statuses: '.implode(',', $this->statuses))
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $filter = $input->getOption('filterStatus');
+        $filter = $input->getOption('filter-status');
 
         $apps = $this->apiClient->getApplications($filter);
 
@@ -44,7 +44,7 @@ class ApiApplicationsCommand extends Command
 
         $msg = count($apps);
         if ($filter) {
-            $msg .= sprintf(' applications found (filter on status "%s")', implode(',', $this->applicationStatus));
+            $msg .= sprintf(' applications found (filter on status "%s")', implode(',', $this->statuses));
         } else {
             $msg .= ' applications found';
         }

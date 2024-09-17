@@ -6,6 +6,10 @@ use App\Exception\ParsingException;
 use App\Model\Application;
 use App\Model\Device;
 use App\Model\Gateway;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class ApiClient
@@ -13,6 +17,8 @@ final readonly class ApiClient
     public function __construct(
         private HttpClientInterface $iotApiClient,
         private ApiParser $apiParser,
+        private int $gateWayOrgId,
+        private int $apiRequestLimit,
     ) {
     }
 
@@ -28,17 +34,17 @@ final readonly class ApiClient
      * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getApplications(bool $filterOnStatus): array
     {
         $response = $this->iotApiClient->request('GET', '/api/v1/application', [
             'query' => [
                 'offset' => 0,
-                'limit' => 500,
+                'limit' => $this->apiRequestLimit,
             ],
         ]);
         $content = $response->getContent();
@@ -58,10 +64,10 @@ final readonly class ApiClient
      * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getApplication(int $id): Application
     {
@@ -83,10 +89,10 @@ final readonly class ApiClient
      * @throws ParsingException
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getDevice(int $id): Device
     {
@@ -97,20 +103,29 @@ final readonly class ApiClient
     }
 
     /**
-     * @return array<Gateway>
+     * Retrieve a list of gateways.
      *
-     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @param bool $filterOnStatus
+     *   Indicates whether to filter gateways based on a specific status
+     *
+     * @return array<Gateway>
+     *   An array of parsed gateways
+     *
+     * @throws ParsingException
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getGateways(bool $filterOnStatus): array
     {
         $response = $this->iotApiClient->request('GET', '/api/v1/chirpstack/gateway', [
             'query' => [
-                'organizationId' => 2,
+                'organizationId' => $this->gateWayOrgId,
                 'offset' => 0,
-                'limit' => 500,
+                'limit' => $this->apiRequestLimit,
             ],
         ]);
         $content = $response->getContent();

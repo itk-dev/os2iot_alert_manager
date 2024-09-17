@@ -1,0 +1,38 @@
+Der har ikke været kontakt til {{ device.name }} i {{ since.hours }} timer og {{ since.minutes }} minutter.
+
+Seneste kontakt var {{ device.latestReceivedMessage.sentTime|date("d-m-Y H:i:s") }}.
+
+--------------------------------------------------------------------------------
+Årsagen kan være
+--------------------------------------------------------------------------------
+1. At enheden er løbet tør for batteri.
+    * Hvis det er tilfældet, så undersøg batteristatus for andre sensorer i løsningen.
+2. Manglende dækning. IoT Lab kan hjælpe med at opsætte yderligere gateways.
+3. Defekt enhed. Kontakt IoT Lab hvis enheden skal udskiftes.
+
+
+--------------------------------------------------------------------------------
+Enhedsinformation
+--------------------------------------------------------------------------------
+Navn: {{ device.name }}
+ID: {{ device.id }}
+Battery: {% if device.statusBattery == -1 %}N/A{% else %}{{ device.statusBattery|number_format(2, ',', '') }}{% endif %}
+
+RSSI: {{ device.latestReceivedMessage.rssi }}
+SNR: {{ device.latestReceivedMessage.snr  }}
+
+--------------------------------------------------------------------------------
+Gateway(s) modtage sidste besked:
+--------------------------------------------------------------------------------
+{% for rxInfo in device.latestReceivedMessage.rxInfo %}
+Gateway {{ loop.index }} af {{ loop.length }}
+Gateway ID: {{ rxInfo.gatewayId }}
+RSSI: {{ rxInfo.rssi }}
+SNR: {{ rxInfo.snr  }}
+Placering: {% include 'mails/map_link.txt.twig' with { 'latitude': rxInfo.location.latitude, 'longitude': rxInfo.location.longitude } %}
+----------------------------------
+{% endfor %}
+
+{% include 'mails/location.txt.twig' with { 'type': 'Enheden', 'latitude': device.location.latitude, 'longitude': device.location.longitude } %}
+
+Du kan se opsætningen af enheden på {{ url }}

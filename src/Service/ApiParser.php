@@ -17,7 +17,7 @@ final readonly class ApiParser
 {
     public function __construct(
         private MetricsService $metricsService,
-        private array $applicationStatus,
+        private array $statuses,
         private string $fromTimeZone,
         private string $timezone,
         private string $timeformat,
@@ -50,7 +50,7 @@ final readonly class ApiParser
         foreach ($parse as $app) {
             // Filter out applications with status not in the configuration.
             if ($filterOnStatus) {
-                if (!in_array($app['status'], $this->applicationStatus)) {
+                if (!in_array($app['status'], $this->statuses)) {
                     continue;
                 }
             }
@@ -133,13 +133,13 @@ final readonly class ApiParser
 
         $device = new Device(
             id: $data['id'],
+            applicationId: $data['application']['id'],
             createdAt: $this->parseDate($data['createdAt']),
             updatedAt: $this->parseDate($data['createdAt']),
             name: $data['name'],
             location: $this->parseLocation($data['location']),
-            latestReceivedMessage: $this->parseMessage($data['latestReceivedMessage']),
+            latestReceivedMessage: $data['latestReceivedMessage'] ? $this->parseMessage($data['latestReceivedMessage']) : null,
             statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
-            // @todo: Parse metadata when examples is given.
             metadata: $this->parseMetadata($data['metadata'] ?? '[]'),
         );
 
@@ -160,7 +160,7 @@ final readonly class ApiParser
      * @param bool $filterOnStatus
      *   Determines whether to filter out applications with a status not in the configuration
      *
-     * @return array
+     * @return array<Gateway>
      *   An array of parsed gateway information objects
      *
      * @throws ParsingException
@@ -178,7 +178,7 @@ final readonly class ApiParser
         foreach ($parse as $gateway) {
             // Filter out applications with status not in the configuration.
             if ($filterOnStatus) {
-                if (!in_array($gateway['status'], $this->applicationStatus)) {
+                if (!in_array($gateway['status'], $this->statuses)) {
                     continue;
                 }
             }
@@ -193,6 +193,9 @@ final readonly class ApiParser
                 description: $gateway['description'],
                 location: $this->parseLocation($gateway['location']),
                 status: $this->statusToEnum($gateway['status']),
+                responsibleName: $gateway['gatewayResponsibleName'],
+                responsibleEmail: $gateway['gatewayResponsibleEmail'],
+                responsiblePhone: $gateway['gatewayResponsiblePhoneNumber'],
             );
         }
 
@@ -209,8 +212,6 @@ final readonly class ApiParser
     /**
      * Parse metadata.
      *
-     * @TODO: better parsing, when better metadata is available.
-     *
      * @param string $data
      *   Raw metadata from the API
      *
@@ -223,6 +224,7 @@ final readonly class ApiParser
     {
         try {
             $json = json_decode($data, associative: true, flags: JSON_THROW_ON_ERROR);
+
             return $json ?? [];
         } catch (\JsonException $e) {
             $this->metricsService->counter(
@@ -267,7 +269,7 @@ final readonly class ApiParser
     }
 
     /**
-     * Parse lastest received message.
+     * Parse the latest received message.
      *
      * @param array $data
      *   The raw latestReceivedMessage data from the API
@@ -285,9 +287,9 @@ final readonly class ApiParser
             id: (int) $data['id'],
             createdAt: $this->parseDate($data['createdAt']),
             sentTime: $this->parseDate($data['sentTime']),
-            rssi: $data['rssi'],
-            snr: $data['snr'],
-            rxInfo: $this->parseRxInfo($data['rawData']['rxInfo']),
+            rssi: $data['rssi'] ?? 0,
+            snr: $data['snr'] ?? 0,
+            rxInfo: isset($data['rawData']['rxInfo']) ? $this->parseRxInfo($data['rawData']['rxInfo']) : [],
         );
     }
 
@@ -308,10 +310,10 @@ final readonly class ApiParser
 
         foreach ($data as $rxInfo) {
             $info[] = new ReceivedInfo(
-                gatewayId: $rxInfo['gatewayId'],
-                rssi: $rxInfo['rssi'],
-                snr: $rxInfo['snr'],
-                crcStatus: $rxInfo['crcStatus'],
+                gatewayId: $rxInfo['gatewayId'] ?? $rxInfo['gatewayID'],
+                rssi: $rxInfo['rssi'] ?? 0,
+                snr: $rxInfo['snr'] ?? ($rxInfo['loRaSNR'] ?? 0),
+                crcStatus: $rxInfo['crcStatus'] ?? 'Unknown',
                 location: $this->parseLocation($rxInfo['location']),
             );
         }

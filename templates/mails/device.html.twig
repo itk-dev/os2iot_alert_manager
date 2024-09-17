@@ -1,0 +1,76 @@
+<p>Der har ikke været kontakt til {{ device.name }} i {{ since.hours }} timer og {{ since.minutes }} minutter.</p>
+
+<p>Seneste kontakt var {{ device.latestReceivedMessage.sentTime|date("d-m-Y H:i:s") }}.</p>
+
+<p><strong>Årsagen kan være</strong></p>
+<ol>
+    <li>
+        At enheden er løbet tør for batteri.
+        <ul>
+            <li>Hvis det er tilfældet, så undersøg batteristatus for andre sensorer i løsningen.</li>
+        </ul>
+    </li>
+    <li>Manglende dækning. IoT Lab kan hjælpe med at opsætte yderligere gateways.</li>
+    <li>Defekt enhed. Kontakt IoT Lab hvis enheden skal udskiftes.</li>
+</ol>
+
+<p><strong>Enhedsinformation</strong></p>
+<table style="margin-left: 10px;">
+    <tr>
+        <td>Navn:</td>
+        <td>{{ device.name }}</td>
+    </tr>
+    <tr>
+        <td>ID:</td>
+        <td>{{ device.id }}</td>
+    </tr>
+    <tr>
+        <td>Battery:</td>
+        {% if device.statusBattery == -1 %}
+        <td>N/A</td>
+        {% else %}
+        <td style="color: {% if device.statusBattery > 50 %}green{% elseif device.statusBattery < 20 %}red{% else %}black{% endif %};">{{ device.statusBattery|number_format(2, ',', '') }}</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td>RSSI:</td>
+        <td>{{ device.latestReceivedMessage.rssi }}</td>
+    </tr>
+    <tr>
+        <td>SNR:</td>
+        <td>{{ device.latestReceivedMessage.snr  }}</td>
+    </tr>
+</table>
+
+<p><strong>Gateway(s) modtage sidste besked:</strong></p>
+{% for rxInfo in device.latestReceivedMessage.rxInfo %}
+    <table style="border-style: dashed; border-width: 2px; border-color: gray;width: 450px;padding: 4px;margin-left: 10px;">
+        <thead>
+            <tr>
+                <th style="text-align: left" colspan="2">Gateway {{ loop.index }} af {{ loop.length }}</th>
+            </tr>
+        </thead>
+        <tr>
+            <td>Gateway ID:</td>
+            <td>{{ rxInfo.gatewayId }}</td>
+        </tr>
+        <tr>
+            <td>RSSI:</td>
+            <td>{{ rxInfo.rssi }}</td>
+        </tr>
+        <tr>
+            <td>SNR:</td>
+            <td>{{ rxInfo.snr  }}</td>
+        </tr>
+        <tr>
+            <td>Placering</td>
+            <td>{% include 'mails/map_link.html.twig' with { 'latitude': rxInfo.location.latitude, 'longitude': rxInfo.location.longitude } %}</td>
+        </tr>
+    </table>
+{% endfor %}
+
+{% include 'mails/location.html.twig' with { 'type': 'Enheden', 'latitude': device.location.latitude, 'longitude': device.location.longitude } %}
+
+<p>Du kan se opsætningen af enheden på: <a href="{{ url }}">{{ url }}</a></p>
+
+{% include 'mails/logo.html.twig' %}
