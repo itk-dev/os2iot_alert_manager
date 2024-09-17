@@ -1,4 +1,4 @@
-<p>Der har ikke været kontakt til {{ device.name }} i diff|number_format(2, '', '.') }} sekunder.</p>
+<p>Der har ikke været kontakt til {{ device.name }} i {{ since.hours }} timer og {{ since.minutes }} minutter.</p>
 
 <p>Seneste kontakt var {{ device.latestReceivedMessage.sentTime|date("d-m-Y H:i:s") }}.</p>
 
@@ -43,7 +43,7 @@
     <table style="border-style: dashed; border-width: 2px; border-color: gray;width: 450px;padding: 4px;margin-left: 10px;">
         <thead>
             <tr>
-                <th align="left" style="text-align: left" colspan="2">Gateway {{ loop.index }} af {{ loop.length }}</th>
+                <th style="text-align: left" colspan="2">Gateway {{ loop.index }} af {{ loop.length }}</th>
             </tr>
         </thead>
         <tr>
@@ -67,6 +67,8 @@
 
 {% include 'mails/location.html.twig' with { 'type': 'Enheden', 'latitude': device.location.latitude, 'longitude': device.location.longitude } %}
 
+{% if url is not null %}
 <p>Du kan se opsætningen af enheden på: <a href="{{ url }}">{{ url }}</a></p>
+{% endif %}
 
 {% include 'mails/logo.html.twig' %}

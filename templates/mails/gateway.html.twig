@@ -1,4 +1,4 @@
-<p>Der har ikke været kontakt til {{ gateway.name }} i {{ diff|number_format(2, '', '.') }} sekunder.</p>
+<p>Der har ikke været kontakt til {{ gateway.name }} i {{ since.hours }} timer og {{ since.minutes }} minutter.</p>
 
 <p>Seneste kontakt var <strong>{{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}.</strong></p>
 <p>Årsagerne kan være strømsvigt, manglende netværksdækning eller at udstyret skal genstartes.</p>

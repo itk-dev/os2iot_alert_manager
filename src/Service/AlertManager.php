@@ -58,7 +58,7 @@ final readonly class AlertManager
                 $subject = sprintf(
                     'Gateway "%s" offline siden %s',
                     $gateway->name,
-                    $gateway->lastSeenAt->format('m-d-y H:i:s')
+                    $gateway->lastSeenAt->format('d-m-y H:i:s')
                 );
                 // Gateway limit for last seen is reached.
                 $this->mailService->sendEmail(
@@ -66,6 +66,10 @@ final readonly class AlertManager
                     context: [
                         'gateway' => $gateway,
                         'diff' => $diff,
+                        'since' => [
+                            'hours' => floor($diff / 3600),
+                            'minutes' => floor(($diff % 3600) / 60),
+                        ],
                         'url' => $this->gatewayBaseUrl.$gateway->gatewayId,
                     ],
                     subject: $subject,
@@ -103,20 +107,21 @@ final readonly class AlertManager
             $toMailAddress = $device->metadata[$this->deviceMetadataFieldMail] ?? ($application->contactEmail ?? $this->deviceFallbackMail);
             $phone = $device->metadata[$this->deviceMetadataFieldPhone] ?? ($application->contactEmail ?? $this->deviceFallbackPhone);
 
-            // ENHEDSNAVN offline siden TIDSPUNKT - VARIGHED
-            // @todo: send mail
             $subject = sprintf(
                 'Enhed "%s" offline siden %s',
                 $device->name,
-                $device->latestReceivedMessage->sentTime->format('m-d-y H:i:s')
+                $device->latestReceivedMessage->sentTime->format('d-m-y H:i:s')
             );
             // Gateway limit for last seen is reached.
             $this->mailService->sendEmail(
                 to: $toMailAddress,
                 context: [
                     'device' => $device,
-                    'diff' => $diff,
-                    'url' => $this->deviceBaseUrl.$device->id,
+                    'since' => [
+                        'hours' => floor($diff / 3600),
+                        'minutes' => floor(($diff % 3600) / 60),
+                    ],
+                    'url' => $application?->id ? sprintf($this->deviceBaseUrl, $application->id, $device->id) : null,
                 ],
                 subject: $subject,
                 htmlTemplate: 'device.html.twig',
