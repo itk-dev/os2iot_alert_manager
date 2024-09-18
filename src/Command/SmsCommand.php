@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Service\SmsClient;
+use App\Service\SmsClientInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -18,7 +18,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class SmsCommand extends Command
 {
     public function __construct(
-        private readonly SmsClient $smsClient,
+        private readonly SmsClientInterface $smsClient,
     ) {
         parent::__construct();
     }
