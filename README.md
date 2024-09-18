@@ -23,9 +23,12 @@ gateways and `metadata` on devices to detect whom to alter and when not to send
 alters. This decision has been taken to keep this application relative simple
 and to have IoT configuration in only one place (inside OS² IoT).
 
-![Notification Example](./assets/AlertManager.png)
+![Relationship between services](./assets/AlertManager.png)
 
-The required data consumed from the IoT API is converted into value objects, to
+The diagram above outlines the different services and how they are related in
+this application.
+
+The required data consumed from the IoT API are converted into value objects, to
 ensure type safety and stability. This also ensures that data anomalies are
 detected and logged.
 
@@ -150,22 +153,53 @@ This is the order of contact information fallback order.
 
 ## Commands
 
-All commands have `--help` with helper text explaining all the options.
+If using Docker, they are executed in the `phpfpm` container by executing
+`bin/console`. All commands have `--help` option which will output text
+explaining all the options and what they are used for.
 
-app:alert:checks Run checks
+For example, list all application filtered on the configured statuses:
 
-app:api:application Get a single application from API server
+```shell
+docker composer exec phpfpm bin/console app:api:applications --filter-status
+```
 
-app:api:applications Get applications from API server
+The main command for the application is the `checks alter` command, that runs
+the alter manger service. This command has a large number of options to change
+its behavior, so use `--help` to see them all.
 
-app:api:device Get device from API server
+Here are three examples that should cover the basic usage. The first checks all
+gateways filtered base on configured status and disabling notification via SMS.
 
-app:api:gateways Get gateways from API server
+```shell
+docker composer exec phpfpm bin/console app:alert:checks --only-gateways --filter-status --no-sms
+```
 
-app:mail:test Send test e-mail
+The next command checks applications and thereby all devices found in the
+applications.
 
-app:sms:test Send test SMS
+```shell
+docker composer exec phpfpm bin/console app:alert:checks --only-applications --filter-status
+```
 
-### Cron
+This command executes all tests and covers both gateways, applications (and
+thereby devices).
 
-- contribute
+```shell
+docker composer exec phpfpm bin/console app:alert:checks --all --filter-status
+```
+
+### API consumption test commands
+
+Collection of commands to test and see information extracted from the IoT SPI.
+
+* app:api:application (Get a single application from API server)
+* app:api:applications (Get applications from API server)
+* app:api:device (Get device from API server)
+* app:api:gateways (Get gateways from API server)
+
+### Mail/Sms test commands
+
+Two commands to test mails and SMS intergration.
+
+* app:mail:test (Send test e-mail)
+* app:sms:test (Send test SMS)
