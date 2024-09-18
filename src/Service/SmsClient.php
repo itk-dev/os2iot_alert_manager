@@ -17,7 +17,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *
  * @see https://pushapi.ecmr.biz/docs/index.html?url=/swagger/v1/swagger.json#tag/SMS-gateway
  */
-final readonly class SmsClient
+final readonly class SmsClient implements SmsClientInterface
 {
     public function __construct(
         private HttpClientInterface $smsClient,
