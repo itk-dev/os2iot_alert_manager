@@ -1,0 +1,13 @@
+Der har ikke været kontakt til {{ name }} i {{ seenAgo }} skunder.
+
+Seneste kontakt var {{ lastSeenDate|date("d-m-Y H:i:s") }}
+
+Navn: {{ name }}
+Beskrivelse: {{ description }}
+Batteristatus: {{ battery|number_format(2, '.', '') }}
+
+Årsagen kan være
+1. Manglende dækning. IoT Lab kan hjælpe med at opsætte yderligere gateways.
+2. Defekt enhed. Kontakt IoT Lab hvis enheden skal udskiftes.
+
+{% include 'mails/location.txt.twig' with { 'type': 'Enheden', 'latitude': location.latitude, 'longitude': location.longitude } %}

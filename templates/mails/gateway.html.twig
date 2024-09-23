@@ -1,0 +1,24 @@
+<p>Der var sidste gang kontakt til "{{ gateway.name }}" {{ ago }}.</p>
+
+<p>Seneste kontakt var <strong>{{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}.</strong></p>
+
+<p>Årsagerne kan være strømsvigt, manglende netværksdækning eller at udstyret skal genstartes.</p>
+
+<p><strong>Gateway information</strong></p>
+<table style="margin-left: 10px;">
+    <tr>
+        <td>Navn:</td><td>{{ gateway.name }}</td>
+    </tr>
+    <tr>
+        <td>ID:</td><td>{{ gateway.gatewayId }}</td>
+    </tr>
+    <tr>
+        <td>Beskrivelse:</td><td>{{ gateway.description|replace({'\n': '<br>'})|raw }}</td>
+    </tr>
+</table>
+
+{% include 'mails/location.html.twig' with { 'type': 'Gatewayen', 'latitude': gateway.location.latitude, 'longitude': gateway.location.longitude } %}
+
+<p>Du kan se opsætningen af gatewayen på: <a href="{{ url }}">{{ url }}</a></p>
+
+{% include 'mails/logo.html.twig' %}
