@@ -5,3 +5,8 @@ services:
       - app
     ports:
       - '6379'
+
+  nginx:
+    labels:
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-metrics.rule=Host(`${COMPOSE_SERVER_DOMAIN}`) && PathPrefix(`/metrics`) "
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-metrics.middlewares=ITKMetricsAuth@file"
