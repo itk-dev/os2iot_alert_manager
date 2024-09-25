@@ -1,6 +1,27 @@
-Der var sidste gang kontakt til "{{ device.name }}" {{ ago }}.
+Der var senest kontakt til "{{ device.name }}" {{ ago }}.
 
 Seneste kontakt var {{ device.latestReceivedMessage.sentTime|date("d-m-Y H:i:s") }}.
+
+--------------------------------------------------------------------------------
+Enhedsinformation
+--------------------------------------------------------------------------------
+Navn: {{ device.name }}
+EUI: {{ device.id }}
+Batteriniveau: {% if device.statusBattery == -1 %}N/A{% else %}{{ device.statusBattery|number_format(0, ',', '') }}{% endif %}
+
+Placering: {% include 'mails/map_link.txt.twig' with { 'latitude': device.location.latitude, 'longitude': device.location.longitude, 'content': device.location.latitude ~ "," ~ device.location.longitude } %}
+
+--------------------------------------------------------------------------------
+Gateway(s), der har modtage senest besked:
+--------------------------------------------------------------------------------
+{% for rxInfo in device.latestReceivedMessage.rxInfo %}
+Gateway {{ loop.index }} af {{ loop.length }}
+Gateway EUI: {{ rxInfo.gatewayId }}
+RSSI: {{ rxInfo.rssi }}
+SNR: {{ rxInfo.snr  }}
+Placering: {% include 'mails/map_link.txt.twig' with { 'latitude': rxInfo.location.latitude, 'longitude': rxInfo.location.longitude, 'content': rxInfo.location.latitude ~ "," ~ rxInfo.location.longitude } %}
+----------------------------------
+{% endfor %}
 
 --------------------------------------------------------------------------------
 Årsagen kan være
@@ -9,30 +30,5 @@ Seneste kontakt var {{ device.latestReceivedMessage.sentTime|date("d-m-Y H:i:s")
     * Hvis det er tilfældet, så undersøg batteristatus for andre sensorer i løsningen.
 2. Manglende dækning. IoT Lab kan hjælpe med at opsætte yderligere gateways.
 3. Defekt enhed. Kontakt IoT Lab hvis enheden skal udskiftes.
-
-
---------------------------------------------------------------------------------
-Enhedsinformation
---------------------------------------------------------------------------------
-Navn: {{ device.name }}
-ID: {{ device.id }}
-Battery: {% if device.statusBattery == -1 %}N/A{% else %}{{ device.statusBattery|number_format(2, ',', '') }}{% endif %}
-
-RSSI: {{ device.latestReceivedMessage.rssi }}
-SNR: {{ device.latestReceivedMessage.snr  }}
-
---------------------------------------------------------------------------------
-Gateway(s) modtage sidste besked:
---------------------------------------------------------------------------------
-{% for rxInfo in device.latestReceivedMessage.rxInfo %}
-Gateway {{ loop.index }} af {{ loop.length }}
-Gateway ID: {{ rxInfo.gatewayId }}
-RSSI: {{ rxInfo.rssi }}
-SNR: {{ rxInfo.snr  }}
-Placering: {% include 'mails/map_link.txt.twig' with { 'latitude': rxInfo.location.latitude, 'longitude': rxInfo.location.longitude } %}
-----------------------------------
-{% endfor %}
-
-{% include 'mails/location.txt.twig' with { 'type': 'Enheden', 'latitude': device.location.latitude, 'longitude': device.location.longitude } %}
 
 Du kan se opsætningen af enheden på {{ url }}

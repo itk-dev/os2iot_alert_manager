@@ -1,4 +1,4 @@
-Der var sidste gang kontakt til "{{ gateway.name }}" {{ ago }}.
+Der var senest kontakt til "{{ gateway.name }}" {{ ago }}.
 
 Seneste kontakt var {{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}.
 
@@ -10,7 +10,6 @@ Gateway information
 Navn: {{ gateway.name }}
 ID: {{ gateway.gatewayId }}
 Beskrivelse: {{ gateway.description }}
-
-{% include 'mails/location.txt.twig' with { 'type': 'Gatewayen', 'latitude': gateway.location.latitude, 'longitude': gateway.location.longitude } %}
+Placering: {% include 'mails/map_link.txt.twig' with { 'latitude': gateway.location.latitude, 'longitude': gateway.location.longitude, 'content': gateway.location.latitude ~ "," ~ gateway.location.longitude } %}
 
 Du kan se opsætningen af gatewayen på: {{ url }}
