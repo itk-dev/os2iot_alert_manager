@@ -88,7 +88,7 @@ final readonly class AlertManager
                     $subject = sprintf(
                         'Gateway "%s" offline siden %s',
                         $gateway->name,
-                        $gateway->lastSeenAt->format('d-m-y H:i:s')
+                        $gateway->lastSeenAt->format('d-m-Y H:i:s')
                     );
                     $this->mailService->sendEmail(
                         to: $this->findGatewayToMailAddress($gateway, $overrideMail),
@@ -230,9 +230,9 @@ final readonly class AlertManager
             // Device limit for last seen is reached.
             if (!$noMail) {
                 $subject = sprintf(
-                    'Enhed "%s" offline siden %s',
+                    'Enheden "%s" offline siden %s',
                     $device->name,
-                    $device->latestReceivedMessage->sentTime->format('d-m-y H:i:s')
+                    $device->latestReceivedMessage->sentTime->format('d-m-Y H:i:s')
                 );
                 $this->mailService->sendEmail(
                     to: $this->findDeviceToMailAddress($device, $application, $overrideMail),

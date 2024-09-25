@@ -1,4 +1,4 @@
-<p>Der var sidste gang kontakt til "{{ gateway.name }}" {{ ago }}.</p>
+<p>Der var senest kontakt til "<a href="{{ url }}">{{ gateway.name }}</a>" {{ ago }}.</p>
 
 <p>Seneste kontakt var <strong>{{ gateway.lastSeenAt|date("d-m-Y H:i:s") }}.</strong></p>
 
@@ -7,7 +7,7 @@
 <p><strong>Gateway information</strong></p>
 <table style="margin-left: 10px;">
     <tr>
-        <td>Navn:</td><td>{{ gateway.name }}</td>
+        <td>Navn:</td><td><a href="{{ url }}">{{ gateway.name }}</a></td>
     </tr>
     <tr>
         <td>ID:</td><td>{{ gateway.gatewayId }}</td>
@@ -15,10 +15,10 @@
     <tr>
         <td>Beskrivelse:</td><td>{{ gateway.description|replace({'\n': '<br>'})|raw }}</td>
     </tr>
+    <tr>
+        <td>Placering</td>
+        <td>{% include 'mails/map_link.html.twig' with { 'latitude': gateway.location.latitude, 'longitude': gateway.location.longitude, 'content': gateway.location.latitude ~ ", " ~ gateway.location.longitude } %}</td>
+    </tr>
 </table>
-
-{% include 'mails/location.html.twig' with { 'type': 'Gatewayen', 'latitude': gateway.location.latitude, 'longitude': gateway.location.longitude } %}
-
-<p>Du kan se opsætningen af gatewayen på: <a href="{{ url }}">{{ url }}</a></p>
 
 {% include 'mails/logo.html.twig' %}
