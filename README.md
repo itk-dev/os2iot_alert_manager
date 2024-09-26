@@ -58,7 +58,7 @@ to [Overriding Environment Values via .env.local](https://symfony.com/doc/curren
 in Symfony's documentation.
 
 In the next section, we highlight the configurations that you should or may need
-to change to get the alter manager working properly.
+to change to get the alert manager working properly.
 
 ### API access configuration
 
@@ -78,9 +78,9 @@ this comma-separated list.
 
 Value available are: `NONE`, `IN-OPERATION`, `PROTOTYPE`, `PROJECT` and `OTHER`
 
-* **ALTER_STATUSES** (default: `IN-OPERATION,PROJECT`)
+* **ALERT_STATUSES** (default: `IN-OPERATION,PROJECT`)
 
-### Gateway alter configuration
+### Gateway alert configuration
 
 The contact phone and email are not required information on gateways. If these
 values are not set, variables will be used as a fallback.
@@ -88,7 +88,7 @@ values are not set, variables will be used as a fallback.
 * **ALERT_GATEWAY_FALLBACK_MAIL**
 * **ALERT_GATEWAY_FALLBACK_PHONE**
 
-### Device alter configuration
+### Device alert configuration
 
 This application utilizes metadata on the device to add contact information.
 Since metadata consists of free-text key/value pairs, you can use the
@@ -96,7 +96,7 @@ configuration below to specify which keys should correspond to different contact
 data.
 
 * **ALERT_DEVICE_METADATA_MAIL_FIELD** (default: `email`)
-* **ALTER_DEVICE_METADATA_PHONE_FIELD** (default: `phone`)
+* **ALERT_DEVICE_METADATA_PHONE_FIELD** (default: `phone`)
 
 You can also modify the "last seen" time (which is used to trigger an alert) for
 each device using a metadata field. If not provided, a fallback value will be
@@ -105,7 +105,7 @@ used.
 This is always given in seconds.
 
 * **ALERT_DEVICE_FALLBACK_LIMIT** (default: `86400` - 24 hours)
-* **ALTER_DEVICE_METADATA_THRESHOLD_FIELD** (default: `notification_threshold`)
+* **ALERT_DEVICE_METADATA_THRESHOLD_FIELD** (default: `notification_threshold`)
 
 If contact data is not found in the metadata configuration from above, these
 variables below can be used to define fallbacks.
@@ -113,25 +113,25 @@ variables below can be used to define fallbacks.
 * **ALERT_DEVICE_FALLBACK_MAIL**
 * **ALERT_DEVICE_FALLBACK_PHONE**
 
-### Silence alters
+### Silence alerts
 
 This application does not maintain any state, so it will send the same alert
 every time it is executed until the problem is resolved. There are two ways to
 silence or acknowledge an alert:
 
-1) Change its status to one not in `ALTER_STATUSES`.
+1) Change its status to one not in `ALERT_STATUSES`.
 2) Set a tag on a gateway or on as metadata on devices with an until date.
 
-* **ALTER_GATEWAY_SILENCED_TAG** (default: `silenced_until`)
-* **ALTER_DEVICE_METADATA_SILENCED_FIELD** (default: `silenced_until`)
-* **ALTER_SILENCED_TIME_FORMAT** (default: `d-m-y\TH:i:s` eg. 18-09-24T16:00:00)
+* **ALERT_GATEWAY_SILENCED_TAG** (default: `silenced_until`)
+* **ALERT_DEVICE_METADATA_SILENCED_FIELD** (default: `silenced_until`)
+* **ALERT_SILENCED_TIME_FORMAT** (default: `d-m-y\TH:i:s` eg. 18-09-24T16:00:00)
 
 ### Templates (mail and SMS)
 
 All email and SMS content is formatted using Twig templates. To change the
 wording, you can copy the templates from the `/app/templates` directory within
 the `phpfpm` container, modify them, and then override the original templates by
-mapping the updated versions into the container. Doing this way will not alter
+mapping the updated versions into the container. Doing this way will not alert
 the application code and keep git clean.
 
 ### Fallback order
@@ -163,7 +163,7 @@ For example, list all applications filtered on the configured statuses:
 docker composer exec phpfpm bin/console app:api:applications --filter-status
 ```
 
-The primary command for the application is `checks alter`, which runs the alter
+The primary command for the application is `checks alert`, which runs the alert
 manager service. This command provides numerous options to modify its behavior;
 use `--help` to view all available options.
 
