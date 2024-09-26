@@ -8,7 +8,15 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [Unreleased]
 
-### Added
+## [1.0.0-beta3] - 2024-09-26
+
+- Fixed typos in configuration and readme. 
+
+## [1.0.0-beta2] - 2024-09-25
+
+- Updated mail templets.
+
+## [1.0.0-beta1] - 2024-09-23
 
 - Added support for silencing alter using metadata on device and tags on gateways.
 - Added logging to check command.
@@ -25,3 +33,6 @@ See [keep a changelog] for information about writing changes to this log.
 
 [keep a changelog]: https://keepachangelog.com/en/1.1.0/
 [unreleased]: https://github.com/itk-dev/event-database-imports/compare/main...develop
+[1.0.0-beta2]: https://github.com/olivierlacan/keep-a-changelog/compare/1.0.0-beta3...1.0.0-beta2
+[1.0.0-beta2]: https://github.com/olivierlacan/keep-a-changelog/compare/1.0.0-beta2...1.0.0-beta1
+[1.0.0-beta1]: https://github.com/itk-dev/event-database-imports/releases/tag/1.0.0-beta1

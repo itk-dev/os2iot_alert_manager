@@ -29,7 +29,7 @@ services:
 
     App\Service\ApiParser:
         arguments:
-            $statuses: '%env(csv:ALTER_STATUSES)%'
+            $statuses: '%env(csv:ALERT_STATUSES)%'
             $fromTimeZone: '%env(string:API_ORIGINAL_TIMEZONE)%'
             $timezone: '%env(string:API_TO_TIMEZONE)%'
             $timeformat: '%env(string:API_DATE_FORMAT)%'
@@ -49,7 +49,7 @@ services:
 
     App\Service\AlertManager:
         arguments:
-            $applicationCheckStartDate: '%env(bool:ALTER_APPLICATION_CHECK_START_DATE)%'
+            $applicationCheckStartDate: '%env(bool:ALERT_APPLICATION_CHECK_START_DATE)%'
             $gatewayLimit: '%env(int:ALERT_GATEWAY_LIMIT)%'
             $gatewayFallbackMail: '%env(string:ALERT_GATEWAY_FALLBACK_MAIL)%'
             $gatewayFallbackPhone: '%env(string:ALERT_GATEWAY_FALLBACK_PHONE)%'
@@ -57,24 +57,24 @@ services:
             $deviceFallbackLimit: '%env(int:ALERT_DEVICE_FALLBACK_LIMIT)%'
             $deviceFallbackMail: '%env(string:ALERT_DEVICE_FALLBACK_MAIL)%'
             $deviceFallbackPhone: '%env(string:ALERT_DEVICE_FALLBACK_PHONE)%'
-            $deviceMetadataFieldLimit: '%env(ALTER_DEVICE_METADATA_THRESHOLD_FIELD)%'
+            $deviceMetadataFieldLimit: '%env(ALERT_DEVICE_METADATA_THRESHOLD_FIELD)%'
             $deviceMetadataFieldMail: '%env(ALERT_DEVICE_METADATA_MAIL_FIELD)%'
-            $deviceMetadataFieldPhone: '%env(ALTER_DEVICE_METADATA_PHONE_FIELD)%'
+            $deviceMetadataFieldPhone: '%env(ALERT_DEVICE_METADATA_PHONE_FIELD)%'
             $deviceBaseUrl: '%env(resolve:ALERT_DEVICE_URL)%'
-            $gatewaySilencedTag: '%env(string:ALTER_GATEWAY_SILENCED_TAG)%'
-            $deviceMetadataFieldSilenced: '%env(string:ALTER_DEVICE_METADATA_SILENCED_FIELD)%'
-            $silencedTimezone: '%env(string:ALTER_SILENCED_TIMEZONE)%'
-            $silencedTimeFormat: '%env(string:ALTER_SILENCED_TIME_FORMAT)%'
+            $gatewaySilencedTag: '%env(string:ALERT_GATEWAY_SILENCED_TAG)%'
+            $deviceMetadataFieldSilenced: '%env(string:ALERT_DEVICE_METADATA_SILENCED_FIELD)%'
+            $silencedTimezone: '%env(string:ALERT_SILENCED_TIMEZONE)%'
+            $silencedTimeFormat: '%env(string:ALERT_SILENCED_TIME_FORMAT)%'
 
     App\Command\ApiApplicationsCommand:
         arguments:
-            $statuses: '%env(csv:ALTER_STATUSES)%'
+            $statuses: '%env(csv:ALERT_STATUSES)%'
 
     App\Command\ApiGatewaysCommand:
         arguments:
-            $statuses: '%env(csv:ALTER_STATUSES)%'
+            $statuses: '%env(csv:ALERT_STATUSES)%'
 
     App\Command\AlertChecksCommand:
         arguments:
             $timezone: '%env(string:API_TO_TIMEZONE)%'
-            $statuses: '%env(csv:ALTER_STATUSES)%'
+            $statuses: '%env(csv:ALERT_STATUSES)%'
