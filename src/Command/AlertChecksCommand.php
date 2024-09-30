@@ -33,7 +33,7 @@ class AlertChecksCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('date', null, InputOption::VALUE_REQUIRED, 'Overide date used to check (mostly for testing "'.$this->dateFormat.'")')
+            ->addOption('date', null, InputOption::VALUE_REQUIRED, 'Override datetime used in checks for testing purposes. Use the format "'.$this->dateFormat.'")')
             ->addOption('all', 'a', InputOption::VALUE_NONE, 'Run all checks')
             ->addOption('only-applications', null, InputOption::VALUE_NONE, 'Only check applications')
             ->addOption('only-gateways', null, InputOption::VALUE_NONE, 'Only check gateways')

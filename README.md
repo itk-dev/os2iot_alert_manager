@@ -1,4 +1,4 @@
-# IoT Alter Manager
+# IoT Alert Manager
 
 This is a Symfony command-line tool that can be used to set up alerts (sending
 both emails and text messages) based on the last time a specific gateway or
@@ -47,8 +47,7 @@ this path can be reconfigured if needed.
 ## Logs
 
 The application outputs basic log information and errors to standard output and
-error. These logs can be sent to [Loki](https://grafana.com/oss/loki/) when
-f.eks. running Docker.
+error. These logs can be sent to [Loki](https://grafana.com/oss/loki/) when running e.g. Docker.
 
 ## Configurations
 
@@ -83,14 +82,14 @@ Value available are: `NONE`, `IN-OPERATION`, `PROTOTYPE`, `PROJECT` and `OTHER`
 ### Gateway alert configuration
 
 The contact phone and email are not required information on gateways. If these
-values are not set, variables will be used as a fallback.
+values are not set, the following variables will be used as a fallbacks.
 
 * **ALERT_GATEWAY_FALLBACK_MAIL**
 * **ALERT_GATEWAY_FALLBACK_PHONE**
 
 ### Device alert configuration
 
-This application utilizes metadata on the device to add contact information.
+This application utilizes metadata on the device to get contact information.
 Since metadata consists of free-text key/value pairs, you can use the
 configuration below to specify which keys should correspond to different contact
 data.
@@ -141,7 +140,7 @@ This is the order of contact information fallback order.
 **Gateways**:
 
 * Command override
-* Gateways contact information
+* Gateway contact information
 * Gateway fallback mail (.env)
 
 **Devices**:
@@ -153,7 +152,7 @@ This is the order of contact information fallback order.
 
 ## Commands
 
-If using Docker, they are executed in the `phpfpm` container by executing
+If using Docker, commands are executed in the `phpfpm` container by executing
 `bin/console`. All commands have `--help` option which will output text
 explaining all the options and what they are used for.
 
@@ -163,7 +162,7 @@ For example, list all applications filtered on the configured statuses:
 docker composer exec phpfpm bin/console app:api:applications --filter-status
 ```
 
-The primary command for the application is `checks alert`, which runs the alert
+The primary command for the application is `app:alert:checks`, which runs the alert
 manager service. This command provides numerous options to modify its behavior;
 use `--help` to view all available options.
 
@@ -179,28 +178,28 @@ The next command checks applications and thereby all devices found in the
 applications.
 
 ```shell
-docker composer exec phpfpm bin/console app:alert:checks --only-applications --filter-status
+docker composer exec phpfpm bin/console app:alert:checks --only-applications
 ```
 
 This command executes all tests and covers both gateways, applications (and
 thereby devices).
 
 ```shell
-docker composer exec phpfpm bin/console app:alert:checks --all --filter-status
+docker composer exec phpfpm bin/console app:alert:checks --all
 ```
 
 ### API consumption test commands
 
 Collection of commands to test and see information extracted from the IoT SPI.
 
-* app:api:application (Get a single application from API server)
-* app:api:applications (Get applications from API server)
-* app:api:device (Get device from API server)
-* app:api:gateways (Get gateways from API server)
+* `app:api:application` (Get a single application from API server)
+* `app:api:applications` (Get applications from API server)
+* `app:api:device` (Get device from API server)
+* `app:api:gateways` (Get gateways from API server)
 
 ### Mail/Sms test commands
 
 Two commands to test mails and SMS integration.
 
-* app:mail:test (Send test e-mail)
-* app:sms:test (Send test SMS)
+* `app:mail:test` (Send test e-mail)
+* `app:sms:test` (Send test SMS)

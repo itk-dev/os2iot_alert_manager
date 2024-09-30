@@ -18,9 +18,9 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [1.0.0-beta1] - 2024-09-23
 
-- Added support for silencing alter using metadata on device and tags on gateways.
+- Added support for silencing alert using metadata on device and tags on gateways.
 - Added logging to check command.
-- Added SMS templates and service to alters
+- Added SMS templates and service to alerts
 - Added application last-seen checker.
 - Added device last-seen checker.
 - Added Gateway last-seen checker.

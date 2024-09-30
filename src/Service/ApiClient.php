@@ -41,6 +41,9 @@ final readonly class ApiClient
      */
     public function getApplications(bool $filterOnStatus): array
     {
+        // Currently the IoT API does not work correctly with offset and limits.
+        // Therefore, we use offset 0 and set limit high, .e.g. 999,
+        // to just get all applications.
         $response = $this->iotApiClient->request('GET', '/api/v1/application', [
             'query' => [
                 'offset' => 0,
@@ -121,6 +124,9 @@ final readonly class ApiClient
      */
     public function getGateways(bool $filterOnStatus): array
     {
+        // Currently the IoT API does not work correctly with offset and limits.
+        // Therefore, we use offset 0 and set limit high, .e.g. 999,
+        // to just get all applications.
         $response = $this->iotApiClient->request('GET', '/api/v1/chirpstack/gateway', [
             'query' => [
                 'organizationId' => $this->gateWayOrgId,

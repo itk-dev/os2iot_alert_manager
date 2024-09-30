@@ -1,6 +1,6 @@
 {
-    "name": "itkdev/iot_alter_manager",
-    "description": "IoT alter manager - IoT observability",
+    "name": "itkdev/iot_alert_manager",
+    "description": "IoT alert manager - IoT observability",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
