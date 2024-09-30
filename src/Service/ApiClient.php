@@ -126,7 +126,7 @@ final readonly class ApiClient
     {
         // Currently the IoT API does not work correctly with offset and limits.
         // Therefore, we use offset 0 and set limit high, .e.g. 999,
-        // to just get all applications.
+        // to just get all gateways.
         $response = $this->iotApiClient->request('GET', '/api/v1/chirpstack/gateway', [
             'query' => [
                 'organizationId' => $this->gateWayOrgId,

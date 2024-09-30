@@ -159,7 +159,7 @@ explaining all the options and what they are used for.
 For example, list all applications filtered on the configured statuses:
 
 ```shell
-docker composer exec phpfpm bin/console app:api:applications --filter-status
+docker compose exec phpfpm bin/console app:api:applications --filter-status
 ```
 
 The primary command for the application is `app:alert:checks`, which runs the alert
@@ -171,21 +171,21 @@ gateways, filtered based on the configured statuses, and disables SMS
 notifications.
 
 ```shell
-docker composer exec phpfpm bin/console app:alert:checks --only-gateways --filter-status --no-sms
+docker compose exec phpfpm bin/console app:alert:checks --only-gateways --filter-status --no-sms
 ```
 
 The next command checks applications and thereby all devices found in the
 applications.
 
 ```shell
-docker composer exec phpfpm bin/console app:alert:checks --only-applications
+docker compose exec phpfpm bin/console app:alert:checks --only-applications
 ```
 
 This command executes all tests and covers both gateways, applications (and
 thereby devices).
 
 ```shell
-docker composer exec phpfpm bin/console app:alert:checks --all
+docker compose exec phpfpm bin/console app:alert:checks --all
 ```
 
 ### API consumption test commands
