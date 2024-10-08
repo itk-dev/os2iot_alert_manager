@@ -48,7 +48,7 @@ final readonly class ApiClient
      */
     public function getApplications(bool $filterOnStatus): array
     {
-        $cacheKey = 'iot_applications_'.($filterOnStatus ? 'filtered' : 'all');
+        $cacheKey = 'iot_applications';
         $content = $this->cache->get($cacheKey, function (ItemInterface $item) {
             $item->expiresAfter($this->applicationCacheTTL);
 
@@ -143,7 +143,7 @@ final readonly class ApiClient
      */
     public function getGateways(bool $filterOnStatus): array
     {
-        $cacheKey = 'iot_gateways_'.($filterOnStatus ? 'filtered' : 'all');
+        $cacheKey = 'iot_gateways';
         $content = $this->cache->get($cacheKey, function (ItemInterface $item) {
             $item->expiresAfter($this->gatewayCacheTTL);
 
