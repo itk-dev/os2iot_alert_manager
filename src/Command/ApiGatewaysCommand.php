@@ -61,7 +61,7 @@ class ApiGatewaysCommand extends Command
 
         $msg = count($gateways);
         if ($filter) {
-            $msg .= sprintf(' gateways found (filter on status "%s")', implode(',', $this->statuses));
+            $msg .= sprintf(' gateways found (filtered on statuses "%s")', implode(',', $this->statuses));
         } else {
             $msg .= ' applications found';
         }

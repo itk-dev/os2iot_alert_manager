@@ -27,7 +27,7 @@ class SmsCommand extends Command
     {
         $this
             ->addArgument('to', InputArgument::REQUIRED, 'The phone number to send SMS to')
-            ->addOption('msg', 'm', InputOption::VALUE_REQUIRED, 'Message to send', 'This is an IoT alter manager test')
+            ->addOption('msg', 'm', InputOption::VALUE_REQUIRED, 'Message to send', 'This is an IoT Alert Manager test')
             ->addOption('flash', 'f', InputOption::VALUE_NONE, 'Send as flash message')
         ;
     }

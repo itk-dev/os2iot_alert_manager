@@ -357,7 +357,7 @@ final readonly class ApiParser
                 help: 'The total number of date parsing exceptions',
                 labels: ['type' => 'exception']
             );
-            throw new ParsingException($errorMsg ?? 'Unknown data conversion error');
+            throw new ParsingException($errorMsg ?? 'Unknown date conversion error');
         }
 
         return $date->setTimezone($timezone);

@@ -10,7 +10,7 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [1.0.0-beta3] - 2024-09-26
 
-- Fixed typos in configuration and readme. 
+- Fixed typos in configuration and readme.
 
 ## [1.0.0-beta2] - 2024-09-25
 
@@ -18,9 +18,9 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [1.0.0-beta1] - 2024-09-23
 
-- Added support for silencing alter using metadata on device and tags on gateways.
+- Added support for silencing alert using metadata on device and tags on gateways.
 - Added logging to check command.
-- Added SMS templates and service to alters
+- Added SMS templates and service to alerts
 - Added application last-seen checker.
 - Added device last-seen checker.
 - Added Gateway last-seen checker.
@@ -32,7 +32,7 @@ See [keep a changelog] for information about writing changes to this log.
 - Symfony core.
 
 [keep a changelog]: https://keepachangelog.com/en/1.1.0/
-[unreleased]: https://github.com/itk-dev/event-database-imports/compare/main...develop
-[1.0.0-beta2]: https://github.com/olivierlacan/keep-a-changelog/compare/1.0.0-beta3...1.0.0-beta2
+[Unreleased]: https://github.com/itk-dev/event-database-imports/compare/main...develop
+[1.0.0-beta3]: https://github.com/olivierlacan/keep-a-changelog/compare/1.0.0-beta3...1.0.0-beta2
 [1.0.0-beta2]: https://github.com/olivierlacan/keep-a-changelog/compare/1.0.0-beta2...1.0.0-beta1
 [1.0.0-beta1]: https://github.com/itk-dev/event-database-imports/releases/tag/1.0.0-beta1

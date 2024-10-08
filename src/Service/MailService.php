@@ -28,7 +28,7 @@ final readonly class MailService
      * @param array $context
      *   The context for the email template
      * @param string $subject
-     *   The subject of the email. Defaults to 'Test mail from alter manager'.
+     *   The subject of the email. Defaults to 'Test mail from alert manager'.
      * @param string $htmlTemplate
      *   The HTML template for the email. Defaults to 'test.html.twig'.
      * @param string $textTemplate
@@ -36,7 +36,7 @@ final readonly class MailService
      *
      * @throws MailException
      */
-    public function sendEmail(string $to, array $context, string $subject = 'Test mail from alter manager', string $htmlTemplate = 'test.html.twig', string $textTemplate = 'test.txt.twig'): void
+    public function sendEmail(string $to, array $context, string $subject = 'Test mail from alert manager', string $htmlTemplate = 'test.html.twig', string $textTemplate = 'test.txt.twig'): void
     {
         $email = (new TemplatedEmail())
             ->from($this->fromAddress)
