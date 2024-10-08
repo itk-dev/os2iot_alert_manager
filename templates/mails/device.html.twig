@@ -9,6 +9,10 @@
         <td><a href="{{ url }}">{{ device.name }}</a></td>
     </tr>
     <tr>
+        <td>Applikation:</td>
+        <td>{{ application.name }}</td>
+    </tr>
+    <tr>
         <td>EUI:</td>
         <td>{{ device.id }}</td>
     </tr>
@@ -34,7 +38,7 @@
 
 <p><strong>Gateway(s), der har modtage senest besked:</strong></p>
 {% for rxInfo in device.latestReceivedMessage.rxInfo %}
-    <table style="border-style: dashed; border-width: 2px; border-color: gray;width: 450px;padding: 4px;margin-left: 10px;">
+    <table style="border-style: dashed; border-width: 2px; border-color: gray;width: 500px;padding: 4px;margin-left: 10px;">
         <thead>
             <tr>
                 <th style="text-align: left" colspan="2">Gateway {{ loop.index }} af {{ loop.length }}</th>
@@ -43,6 +47,10 @@
         <tr>
             <td>Gateway EUI:</td>
             <td>{{ rxInfo.gatewayId }}</td>
+        </tr>
+        <tr>
+            <td>Gateway name:</td>
+            <td>{{ rxInfo.gatewayName }}</td>
         </tr>
         <tr>
             <td>RSSI:</td>

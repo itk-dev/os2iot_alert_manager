@@ -26,6 +26,8 @@ services:
         arguments:
             $gateWayOrgId: '%env(int:ALERT_GATEWAY_ORG_ID)%'
             $apiRequestLimit: '%env(int:API_REQUEST_LIMIT)%'
+            $applicationCacheTTL: '%env(int:ALERT_APPLICATION_CACHE_TTL)%'
+            $gatewayCacheTTL: '%env(int:ALERT_GATEWAY_CACHE_TTL)%'
 
     App\Service\ApiParser:
         arguments:
