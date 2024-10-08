@@ -237,6 +237,7 @@ final readonly class AlertManager
                 $this->mailService->sendEmail(
                     to: $this->findDeviceToMailAddress($device, $application, $overrideMail),
                     context: [
+                        'application' => $application,
                         'device' => $device,
                         'ago' => Carbon::createFromImmutable($device->latestReceivedMessage->sentTime)->diffForHumans(parts: 4),
                         'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
