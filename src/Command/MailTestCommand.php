@@ -27,7 +27,7 @@ class MailTestCommand extends Command
     {
         $this
             ->addArgument('to', InputArgument::REQUIRED, 'The phone number to send SMS to')
-            ->addOption('message', 'm', InputOption::VALUE_REQUIRED, 'Message to send', 'This is an IoT alter manager test')
+            ->addOption('message', 'm', InputOption::VALUE_REQUIRED, 'Message to send', 'This is an IoT Alert Manager test')
         ;
     }
 

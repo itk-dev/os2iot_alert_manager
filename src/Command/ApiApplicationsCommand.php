@@ -44,7 +44,7 @@ class ApiApplicationsCommand extends Command
 
         $msg = count($apps);
         if ($filter) {
-            $msg .= sprintf(' applications found (filter on status "%s")', implode(',', $this->statuses));
+            $msg .= sprintf(' applications found (filtered on statuses "%s")', implode(',', $this->statuses));
         } else {
             $msg .= ' applications found';
         }

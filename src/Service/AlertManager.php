@@ -54,7 +54,7 @@ final readonly class AlertManager
      * @param \DateTimeImmutable $now
      *   Relative time to check against
      * @param bool $filterOnStatus
-     *   Filter based on the status given in configuration
+     *   Filter based on the statuses given in configuration
      * @param string $overrideMail
      *   Override the mail-address from the API with this address
      * @param string $overridePhone
@@ -117,8 +117,8 @@ final readonly class AlertManager
                 }
 
                 $this->metricsService->counter(
-                    name: 'alter_gateway_device_notification_tiggered_total',
-                    help: 'Total number of alters triggered for gateways',
+                    name: 'alert_gateway_device_notification_tiggered_total',
+                    help: 'Total number of alerts triggered for gateways',
                     labels: ['type' => 'info']
                 );
             }
@@ -131,7 +131,7 @@ final readonly class AlertManager
      * @param \DateTimeImmutable $now
      *   Relative time to check against
      * @param bool $filterOnStatus
-     *   Filter based on the status given in configuration
+     *   Filter based on the statuses given in configuration
      * @param string $overrideMail
      *   Override the mail-address from the API with this address
      * @param string $overridePhone
@@ -215,7 +215,7 @@ final readonly class AlertManager
         // from.
         if (is_null($device->latestReceivedMessage)) {
             $this->metricsService->counter(
-                name: 'alter_message_missing_total',
+                name: 'alert_message_missing_total',
                 help: 'Device is missing latest received message',
                 labels: ['type' => 'info', 'id' => $device->id]
             );
@@ -237,6 +237,7 @@ final readonly class AlertManager
                 $this->mailService->sendEmail(
                     to: $this->findDeviceToMailAddress($device, $application, $overrideMail),
                     context: [
+                        'application' => $application,
                         'device' => $device,
                         'ago' => Carbon::createFromImmutable($device->latestReceivedMessage->sentTime)->diffForHumans(parts: 4),
                         'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
@@ -260,8 +261,8 @@ final readonly class AlertManager
             }
 
             $this->metricsService->counter(
-                name: 'alter_device_notification_tiggered_total',
-                help: 'Total number of alters triggered for devices',
+                name: 'alert_device_notification_tiggered_total',
+                help: 'Total number of alerts triggered for devices',
                 labels: ['type' => 'info']
             );
         }
@@ -413,7 +414,7 @@ final readonly class AlertManager
     private function isGatewaySilenced(Gateway $gateway): bool
     {
         if (isset($gateway->tags[$this->gatewaySilencedTag])) {
-            return $this->isPasteDate('gateway', $gateway->id, $gateway->tags[$this->gatewaySilencedTag]);
+            return $this->isPastDate('gateway', $gateway->id, $gateway->tags[$this->gatewaySilencedTag]);
         }
 
         return false;
@@ -433,7 +434,7 @@ final readonly class AlertManager
     private function isDeviceSilenced(Device $device): bool
     {
         if (isset($device->metadata[$this->deviceMetadataFieldSilenced])) {
-            return $this->isPasteDate('device', $device->id, $device->metadata[$this->deviceMetadataFieldSilenced]);
+            return $this->isPastDate('device', $device->id, $device->metadata[$this->deviceMetadataFieldSilenced]);
         }
 
         return false;
@@ -454,7 +455,7 @@ final readonly class AlertManager
      *
      * @throws \DateInvalidTimeZoneException
      */
-    private function isPasteDate(string $type, int $id, string $strDate): bool
+    private function isPastDate(string $type, int $id, string $strDate): bool
     {
         $timezone = new \DateTimeZone($this->silencedTimezone);
         $date = \DateTimeImmutable::createFromFormat($this->silencedTimeFormat, $strDate, $timezone);
@@ -468,12 +469,12 @@ final readonly class AlertManager
             }
             $this->logger->error(sprintf('Silenced error at %s (%d):, %s', $type, $id, $errorMsg));
             $this->metricsService->counter(
-                name: 'alter_silenced_parse_date_error_total',
+                name: 'alert_silenced_parse_date_error_total',
                 help: 'The total number of date parsing exceptions',
                 labels: ['type' => 'exception']
             );
 
-            // Default to false, better get extra alter then non.
+            // Default to false. Better an extra alert rather than none.
             return false;
         }
 

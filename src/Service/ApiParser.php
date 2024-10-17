@@ -118,6 +118,8 @@ final readonly class ApiParser
      *
      * @param string $content
      *   The device information from the API
+     * @param array<Gateway> $gateways
+     *   List of gateways (used to enrich the device information)
      *
      * @return Device
      *   Parsed device information object
@@ -126,7 +128,7 @@ final readonly class ApiParser
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
-    public function device(string $content): Device
+    public function device(string $content, array $gateways): Device
     {
         $parse = new JsonParser($content);
         $data = $parse->toArray();
@@ -138,7 +140,7 @@ final readonly class ApiParser
             updatedAt: $this->parseDate($data['createdAt']),
             name: $data['name'],
             location: $data['location'] ? $this->parseLocation($data['location']) : $this->parseLocation(['latitude' => 0, 'longitude' => 0]),
-            latestReceivedMessage: $data['latestReceivedMessage'] ? $this->parseMessage($data['latestReceivedMessage']) : null,
+            latestReceivedMessage: $data['latestReceivedMessage'] ? $this->parseMessage($data['latestReceivedMessage'], $gateways) : null,
             statusBattery: $data['lorawanSettings']['deviceStatusBattery'] ?? -1,
             metadata: $this->parseMetadata($data['metadata'] ?? '[]'),
         );
@@ -183,21 +185,7 @@ final readonly class ApiParser
                 }
             }
 
-            $data[] = new Gateway(
-                id: $gateway['id'],
-                gatewayId: $gateway['gatewayId'],
-                createdAt: $this->parseDate($gateway['createdAt']),
-                updatedAt: $this->parseDate($gateway['updatedAt']),
-                lastSeenAt: $this->parseDate($gateway['lastSeenAt']),
-                name: $gateway['name'],
-                description: $gateway['description'],
-                location: $this->parseLocation($gateway['location']),
-                status: $this->statusToEnum($gateway['status']),
-                responsibleName: $gateway['gatewayResponsibleName'],
-                responsibleEmail: $gateway['gatewayResponsibleEmail'],
-                responsiblePhone: $gateway['gatewayResponsiblePhoneNumber'],
-                tags: $gateway['tags'],
-            );
+            $data[] = $this->gateway(json_encode(['gateway' => $gateway], JSON_UNESCAPED_UNICODE));
         }
 
         $this->metricsService->gauge(
@@ -208,6 +196,36 @@ final readonly class ApiParser
         );
 
         return $data;
+    }
+
+    /**
+     * Parse single gateway.
+     *
+     * @throws ParsingException
+     * @throws \DateInvalidTimeZoneException
+     * @throws \DateMalformedStringException
+     */
+    public function gateway(string $content): Gateway
+    {
+        $parse = new JsonParser($content);
+        $data = $parse->toArray();
+        $gateway = $data['gateway'];
+
+        return new Gateway(
+            id: $gateway['id'],
+            gatewayId: $gateway['gatewayId'],
+            createdAt: $this->parseDate($gateway['createdAt']),
+            updatedAt: $this->parseDate($gateway['updatedAt']),
+            lastSeenAt: $this->parseDate($gateway['lastSeenAt']),
+            name: $gateway['name'],
+            description: $gateway['description'],
+            location: $this->parseLocation($gateway['location']),
+            status: $this->statusToEnum($gateway['status']),
+            responsibleName: $gateway['gatewayResponsibleName'],
+            responsibleEmail: $gateway['gatewayResponsibleEmail'],
+            responsiblePhone: $gateway['gatewayResponsiblePhoneNumber'],
+            tags: $gateway['tags'],
+        );
     }
 
     /**
@@ -274,6 +292,8 @@ final readonly class ApiParser
      *
      * @param array $data
      *   The raw latestReceivedMessage data from the API
+     * @param array<Gateway> $gateways
+     *   Information about the gateways
      *
      * @return Message
      *   Message object
@@ -282,7 +302,7 @@ final readonly class ApiParser
      * @throws \DateInvalidTimeZoneException
      * @throws \DateMalformedStringException
      */
-    private function parseMessage(array $data): Message
+    private function parseMessage(array $data, array $gateways): Message
     {
         return new Message(
             id: (int) $data['id'],
@@ -290,7 +310,7 @@ final readonly class ApiParser
             sentTime: $this->parseDate($data['sentTime']),
             rssi: $data['rssi'] ?? 0,
             snr: $data['snr'] ?? 0,
-            rxInfo: isset($data['rawData']['rxInfo']) ? $this->parseRxInfo($data['rawData']['rxInfo']) : [],
+            rxInfo: isset($data['rawData']['rxInfo']) ? $this->parseRxInfo($data['rawData']['rxInfo'], $gateways) : [],
         );
     }
 
@@ -299,19 +319,22 @@ final readonly class ApiParser
      *
      * @param array $data
      *   The raw rxInfo array from the API
+     * @param array<Gateway> $gateways
+     *   Information about the gateways
      *
      * @return array<ReceivedInfo>
      *   All the received information metadata
      *
      * @throws ParsingException
      */
-    private function parseRxInfo(array $data): array
+    private function parseRxInfo(array $data, array $gateways): array
     {
         $info = [];
 
         foreach ($data as $rxInfo) {
             $info[] = new ReceivedInfo(
                 gatewayId: $rxInfo['gatewayId'] ?? $rxInfo['gatewayID'],
+                gatewayName: $this->findGatewayName($rxInfo['gatewayId'] ?? $rxInfo['gatewayID'], $gateways),
                 rssi: $rxInfo['rssi'] ?? 0,
                 snr: $rxInfo['snr'] ?? ($rxInfo['loRaSNR'] ?? 0),
                 crcStatus: $rxInfo['crcStatus'] ?? 'Unknown',
@@ -320,6 +343,27 @@ final readonly class ApiParser
         }
 
         return $info;
+    }
+
+    /**
+     * Find name of the gateway.
+     *
+     * @param string $gatewayId
+     *   EUI/ID of the gateway to find name for
+     * @param array $gateways<Gateway>
+     *   List of gateways found
+     */
+    private function findGatewayName(string $gatewayId, array $gateways): string
+    {
+        /** @var Gateway $gateway */
+        foreach ($gateways as $gateway) {
+            if ($gateway->gatewayId === $gatewayId) {
+                return $gateway->name;
+            }
+        }
+
+        // Should never happen.
+        return 'Name not found';
     }
 
     /**
@@ -357,7 +401,7 @@ final readonly class ApiParser
                 help: 'The total number of date parsing exceptions',
                 labels: ['type' => 'exception']
             );
-            throw new ParsingException($errorMsg ?? 'Unknown data conversion error');
+            throw new ParsingException($errorMsg ?? 'Unknown date conversion error');
         }
 
         return $date->setTimezone($timezone);

@@ -37,7 +37,7 @@ class ApiDeviceCommand extends Command
         $device = $this->apiClient->getDevice($id);
 
         $output->writeln(json_encode($device, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        $io->success('Successfully fetch data for device');
+        $io->success('Successfully fetched data for device');
 
         return Command::SUCCESS;
     }
