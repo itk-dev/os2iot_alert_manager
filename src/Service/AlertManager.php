@@ -10,6 +10,7 @@ use App\Model\Device;
 use App\Model\Gateway;
 use Carbon\Carbon;
 use ItkDev\MetricsBundle\Service\MetricsService;
+use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -29,6 +30,7 @@ final readonly class AlertManager
         private TemplateService $templateService,
         private LoggerInterface $logger,
         private bool $applicationCheckStartDate,
+        private bool $applicationCheckEndDate,
         private int $gatewayLimit,
         private string $gatewayFallbackMail,
         private string $gatewayFallbackPhone,
@@ -76,6 +78,7 @@ final readonly class AlertManager
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
+     * @throws InvalidArgumentException
      */
     public function checkGateways(\DateTimeImmutable $now, bool $filterOnStatus = true, string $overrideMail = '', string $overridePhone = '', bool $noMail = false, bool $noSms = false): void
     {
@@ -153,12 +156,13 @@ final readonly class AlertManager
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
+     * @throws InvalidArgumentException
      */
     public function checkApplications(\DateTimeImmutable $now, bool $filterOnStatus = true, string $overrideMail = '', string $overridePhone = '', bool $noMail = false, bool $noSms = false): void
     {
         $apps = $this->apiClient->getApplications($filterOnStatus);
         foreach ($apps as $app) {
-            if ($this->skipBasedOnAppStartDate($app)) {
+            if ($this->skipBasedOnAppStartDate($app) || $this->skipBasedOnAppEndDate($app)) {
                 continue;
             }
 
@@ -206,6 +210,7 @@ final readonly class AlertManager
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
+     * @throws InvalidArgumentException
      */
     public function checkDevice(\DateTimeImmutable $now, int $deviceId, ?Application $application = null, string $overrideMail = '', string $overridePhone = '', bool $noMail = false, bool $noSms = false): void
     {
@@ -395,6 +400,31 @@ final readonly class AlertManager
             }
 
             return time() <= $application->startDate->getTimestamp();
+        }
+
+        return false;
+    }
+
+    /**
+     * Skip checking application based on end date.
+     *
+     * @param Application $application
+     *   Application to test
+     *
+     * @return bool
+     *   If the current time is after the application's end date, it returns
+     *   true to indicate skipping, otherwise, it returns false
+     */
+    private function skipBasedOnAppEndDate(Application $application): bool
+    {
+        if ($this->applicationCheckEndDate) {
+            if (is_null($application->endDate)) {
+                // If no application end date is given, we need to not skip as
+                // we do not have data to skip on.
+                return false;
+            }
+
+            return time() >= $application->endDate->getTimestamp();
         }
 
         return false;
