@@ -419,7 +419,7 @@ final readonly class AlertManager
     {
         if ($this->applicationCheckEndDate) {
             if (is_null($application->endDate)) {
-                // If no application start date is given, we need to not skip as
+                // If no application end date is given, we need to not skip as
                 // we do not have data to skip on.
                 return false;
             }
