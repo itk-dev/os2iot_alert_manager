@@ -12,6 +12,7 @@ See [keep a changelog] for information about writing changes to this log.
 - Wrapped application name in device info with link to the application.
 - Added from name to mail address.
 - Added device EUI to device model.
+- Added 'References' header with EUI to mails.
 
 ## [1.0.1] - 2024-11-13
 

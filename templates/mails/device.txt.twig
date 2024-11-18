@@ -6,7 +6,7 @@ Seneste kontakt var {{ device.latestReceivedMessage.sentTime|date("d-m-Y H:i:s")
 Enhedsinformation
 --------------------------------------------------------------------------------
 Navn: {{ device.name }}
-Applikation: {{ applicationUrl }}
+Applikation: {{ application.name }} ({{ applicationUrl }})
 EUI: {{ device.id }}
 Batteriniveau: {% if device.statusBattery == -1 %}N/A{% else %}{{ device.statusBattery|number_format(0, ',', '') }}{% endif %}
 

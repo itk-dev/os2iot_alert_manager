@@ -29,6 +29,8 @@ final readonly class MailService
      *   The recipient's email address
      * @param array $context
      *   The context for the email template
+     * @param string $refId
+     *   References header id (used to link mails)
      * @param string $subject
      *   The subject of the email. Defaults to 'Test mail from alert manager'.
      * @param string $htmlTemplate
@@ -38,7 +40,7 @@ final readonly class MailService
      *
      * @throws MailException
      */
-    public function sendEmail(string $to, array $context, string $subject = 'Test mail from alert manager', string $htmlTemplate = 'test.html.twig', string $textTemplate = 'test.txt.twig'): void
+    public function sendEmail(string $to, array $context, string $refId, string $subject = 'Test mail from alert manager', string $htmlTemplate = 'test.html.twig', string $textTemplate = 'test.txt.twig'): void
     {
         $email = (new TemplatedEmail())
             ->from(new Address($this->fromAddress, $this->fromName))
@@ -51,6 +53,10 @@ final readonly class MailService
             ->htmlTemplate('mails/'.$htmlTemplate)
             ->context($context)
         ;
+
+        // Set references header to thread/link mails.
+        list($localPart, $domainPart) = explode('@', $this->fromAddress);
+        $email->getHeaders()->addTextHeader('References', $refId.'@'.$domainPart);
 
         try {
             $this->mailer->send($email);
