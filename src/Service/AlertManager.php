@@ -235,9 +235,10 @@ final readonly class AlertManager
             // Device limit for last seen is reached.
             if (!$noMail) {
                 $subject = sprintf(
-                    'Enheden "%s" offline siden %s',
+                    'Enheden "%s" offline siden %s (%s)',
                     $device->name,
-                    $device->latestReceivedMessage->sentTime->format('d-m-Y H:i:s')
+                    $device->latestReceivedMessage->sentTime->format('d-m-Y H:i:s'),
+                    $application->name
                 );
                 $this->mailService->sendEmail(
                     to: $this->findDeviceToMailAddress($device, $application, $overrideMail),

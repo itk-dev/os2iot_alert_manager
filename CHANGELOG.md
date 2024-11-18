@@ -8,6 +8,12 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [Unreleased]
 
+- Added application name to subject
+
+## [1.0.1] - 2024-11-13
+
+- Added `skipBasedOnAppEndDate` to checks.
+
 ## [1.0.0] - 2024-10-22
 
 - Bumped version
