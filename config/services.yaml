@@ -53,6 +53,7 @@ services:
         arguments:
             $applicationCheckStartDate: '%env(bool:ALERT_APPLICATION_CHECK_START_DATE)%'
             $applicationCheckEndDate: '%env(bool:ALERT_APPLICATION_CHECK_END_DATE)%'
+            $applicationBaseUrl: '%env(resolve:ALERT_APPLICATION_URL)%'
             $gatewayLimit: '%env(int:ALERT_GATEWAY_LIMIT)%'
             $gatewayFallbackMail: '%env(string:ALERT_GATEWAY_FALLBACK_MAIL)%'
             $gatewayFallbackPhone: '%env(string:ALERT_GATEWAY_FALLBACK_PHONE)%'

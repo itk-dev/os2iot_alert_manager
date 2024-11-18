@@ -31,6 +31,7 @@ final readonly class AlertManager
         private LoggerInterface $logger,
         private bool $applicationCheckStartDate,
         private bool $applicationCheckEndDate,
+        private string $applicationBaseUrl,
         private int $gatewayLimit,
         private string $gatewayFallbackMail,
         private string $gatewayFallbackPhone,
@@ -238,12 +239,13 @@ final readonly class AlertManager
                     'Enheden "%s" offline siden %s (%s)',
                     $device->name,
                     $device->latestReceivedMessage->sentTime->format('d-m-Y H:i:s'),
-                    $application->name
+                    $application->name ?? 'Unamed application'
                 );
                 $this->mailService->sendEmail(
                     to: $this->findDeviceToMailAddress($device, $application, $overrideMail),
                     context: [
                         'application' => $application,
+                        'applicationUrl' => sprintf($this->applicationBaseUrl, $application->id ?? 0),
                         'device' => $device,
                         'ago' => Carbon::createFromImmutable($device->latestReceivedMessage->sentTime)->diffForHumans(parts: 4),
                         'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),

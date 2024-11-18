@@ -8,7 +8,8 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [Unreleased]
 
-- Added application name to subject
+- Added application name to subject.
+- Wrapped application name in device info with link to the application.
 
 ## [1.0.1] - 2024-11-13
 
