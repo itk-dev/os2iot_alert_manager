@@ -46,6 +46,7 @@ services:
     App\Service\MailService:
         arguments:
             $fromAddress: '%env(string:MAILS_FROM)%'
+            $fromName: '%env(string:MAILS_FROM_NAME)%'
             $replyAddress: '%env(string:MAILS_REPLY_TO)%'
             $defaultAddress: '%env(string:MAILS_DEFAULT_CC)%'
 

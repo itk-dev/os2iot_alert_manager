@@ -7,6 +7,7 @@ use ItkDev\MetricsBundle\Service\MetricsService;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
 final readonly class MailService
@@ -15,6 +16,7 @@ final readonly class MailService
         private MailerInterface $mailer,
         private MetricsService $metricsService,
         private string $fromAddress,
+        private string $fromName,
         private string $replyAddress,
         private string $defaultAddress,
     ) {
@@ -39,7 +41,7 @@ final readonly class MailService
     public function sendEmail(string $to, array $context, string $subject = 'Test mail from alert manager', string $htmlTemplate = 'test.html.twig', string $textTemplate = 'test.txt.twig'): void
     {
         $email = (new TemplatedEmail())
-            ->from($this->fromAddress)
+            ->from(new Address($this->fromAddress, $this->fromName))
             ->to($to)
             ->cc($this->defaultAddress)
             ->replyTo($this->replyAddress)

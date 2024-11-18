@@ -10,6 +10,7 @@ See [keep a changelog] for information about writing changes to this log.
 
 - Added application name to subject.
 - Wrapped application name in device info with link to the application.
+- Added from name to mail address
 
 ## [1.0.1] - 2024-11-13
 
