@@ -46,6 +46,7 @@ services:
     App\Service\MailService:
         arguments:
             $fromAddress: '%env(string:MAILS_FROM)%'
+            $fromName: '%env(string:MAILS_FROM_NAME)%'
             $replyAddress: '%env(string:MAILS_REPLY_TO)%'
             $defaultAddress: '%env(string:MAILS_DEFAULT_CC)%'
 
@@ -53,6 +54,7 @@ services:
         arguments:
             $applicationCheckStartDate: '%env(bool:ALERT_APPLICATION_CHECK_START_DATE)%'
             $applicationCheckEndDate: '%env(bool:ALERT_APPLICATION_CHECK_END_DATE)%'
+            $applicationBaseUrl: '%env(resolve:ALERT_APPLICATION_URL)%'
             $gatewayLimit: '%env(int:ALERT_GATEWAY_LIMIT)%'
             $gatewayFallbackMail: '%env(string:ALERT_GATEWAY_FALLBACK_MAIL)%'
             $gatewayFallbackPhone: '%env(string:ALERT_GATEWAY_FALLBACK_PHONE)%'

@@ -53,6 +53,7 @@ class MailTestCommand extends Command
                 ],
                 'battery' => 67.234643,
             ],
+            refId: 'TestLinkedMail'
         );
 
         $io->success('Successfully send mail');

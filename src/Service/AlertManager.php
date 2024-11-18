@@ -31,6 +31,7 @@ final readonly class AlertManager
         private LoggerInterface $logger,
         private bool $applicationCheckStartDate,
         private bool $applicationCheckEndDate,
+        private string $applicationBaseUrl,
         private int $gatewayLimit,
         private string $gatewayFallbackMail,
         private string $gatewayFallbackPhone,
@@ -101,6 +102,7 @@ final readonly class AlertManager
                             'ago' => Carbon::createFromImmutable($gateway->lastSeenAt)->diffForHumans(parts: 4),
                             'url' => $this->gatewayBaseUrl.$gateway->gatewayId,
                         ],
+                        refId: $gateway->gatewayId,
                         subject: $subject,
                         htmlTemplate: 'gateway.html.twig',
                         textTemplate: 'gateway.txt.twig',
@@ -235,18 +237,21 @@ final readonly class AlertManager
             // Device limit for last seen is reached.
             if (!$noMail) {
                 $subject = sprintf(
-                    'Enheden "%s" offline siden %s',
+                    'Enheden "%s" offline siden %s (%s)',
                     $device->name,
-                    $device->latestReceivedMessage->sentTime->format('d-m-Y H:i:s')
+                    $device->latestReceivedMessage->sentTime->format('d-m-Y H:i:s'),
+                    $application->name ?? 'Unamed application'
                 );
                 $this->mailService->sendEmail(
                     to: $this->findDeviceToMailAddress($device, $application, $overrideMail),
                     context: [
                         'application' => $application,
+                        'applicationUrl' => sprintf($this->applicationBaseUrl, $application->id ?? 0),
                         'device' => $device,
                         'ago' => Carbon::createFromImmutable($device->latestReceivedMessage->sentTime)->diffForHumans(parts: 4),
                         'url' => sprintf($this->deviceBaseUrl, $device->applicationId, $device->id),
                     ],
+                    refId: $device->eui,
                     subject: $subject,
                     htmlTemplate: 'device.html.twig',
                     textTemplate: 'device.txt.twig',
