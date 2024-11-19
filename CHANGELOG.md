@@ -8,6 +8,10 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [Unreleased]
 
+## [1.0.3] - 2024-11-19
+
+- Fixed logic error in isDeviceSilenced. 
+
 ## [1.0.2] - 2024-11-18
 
 - Added application name to subject.
@@ -53,7 +57,9 @@ See [keep a changelog] for information about writing changes to this log.
 
 [keep a changelog]: https://keepachangelog.com/en/1.1.0/
 [Unreleased]: https://github.com/itk-dev/iot_alert_manager/compare/main...develop
-[1.0.0]: https://github.com/itk-dev/iot_alert_manager/compare/1.0.0-beta4...1.0.0
+[1.0.2]: https://github.com/itk-dev/iot_alert_manager/compare/1.0.2...1.0.3
+[1.0.1]: https://github.com/itk-dev/iot_alert_manager/compare/1.0.1...1.0.2
+[1.0.0]: https://github.com/itk-dev/iot_alert_manager/compare/1.0.0...1.0.1
 [1.0.0-beta4]: https://github.com/itk-dev/iot_alert_manager/compare/1.0.0-beta3...1.0.0-beta4
 [1.0.0-beta3]: https://github.com/itk-dev/iot_alert_manager/compare/1.0.0-beta2...1.0.0-beta3
 [1.0.0-beta2]: https://github.com/itk-dev/iot_alert_manager/compare/1.0.0-beta1...1.0.0-beta2
