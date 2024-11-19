@@ -10,7 +10,13 @@
     </tr>
     <tr>
         <td>Applikation:</td>
-        <td><a href="{{ applicationUrl }}">{{ application.name }}</a></td>
+        <td>
+        {% if application is defined and application.name is defined %}
+            <a href="{{ applicationUrl }}">{{ application.name }}</a>
+        {% else %}
+            N/A
+        {% endif %}
+        </td>
     </tr>
     <tr>
         <td>EUI:</td>
