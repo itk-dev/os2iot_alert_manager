@@ -233,6 +233,7 @@ final readonly class AlertManager
         // Check timeout.
         $limit = $device->metadata[$this->deviceMetadataFieldLimit] ?? $this->deviceFallbackLimit;
         $diff = $this->timeDiffInSeconds($device->latestReceivedMessage->sentTime, $now);
+
         if ($diff >= $limit && !$this->isDeviceSilenced($device)) {
             // Device limit for last seen is reached.
             if (!$noMail) {
@@ -469,7 +470,7 @@ final readonly class AlertManager
     private function isDeviceSilenced(Device $device): bool
     {
         if (isset($device->metadata[$this->deviceMetadataFieldSilenced])) {
-            return $this->isPastDate('device', $device->id, $device->metadata[$this->deviceMetadataFieldSilenced]);
+            return !$this->isPastDate('device', $device->id, $device->metadata[$this->deviceMetadataFieldSilenced]);
         }
 
         return false;
