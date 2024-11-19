@@ -8,6 +8,10 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [Unreleased]
 
+## [1.0.3] - 2024-11-19
+
+- Fixed logic error in isDeviceSilenced. 
+
 ## [1.0.2] - 2024-11-18
 
 - Added application name to subject.
