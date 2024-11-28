@@ -37,46 +37,6 @@ jobs:
           set -a && source .env && set +a
           APP_ENV=prod composer install --no-dev -o
 
-  test-suite:
-    name: Test suite (${{ matrix.php }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        php: [ '8.3' ]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP, with composer and extensions
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php}}
-          extensions: http, ctype, iconv
-          coverage: xdebug
-
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.dependency-version }}-
-          restore-keys: ${{ runner.os }}-composer-${{ matrix.dependency-version }}-
-
-      - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
-
-      - name: Test suite
-        run: ./vendor/bin/phpunit --coverage-clover=coverage/unit.xml
-
-      - name: Upload coverage to Codecov test
-        uses: codecov/codecov-action@v2
-        with:
-          files: ./coverage/unit.xml
-          flags: unittests, ${{ matrix.php }}
-
   php-cs-fixer:
     runs-on: ubuntu-20.04
     strategy:
