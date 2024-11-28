@@ -8,6 +8,8 @@ See [keep a changelog] for information about writing changes to this log.
 
 ## [Unreleased]
 
+- Fixed logic error in isGatewaySilenced.
+
 ## [1.0.3] - 2024-11-19
 
 - Fixed logic error in isDeviceSilenced. 
