@@ -450,7 +450,7 @@ final readonly class AlertManager
     private function isGatewaySilenced(Gateway $gateway): bool
     {
         if (isset($gateway->tags[$this->gatewaySilencedTag])) {
-            return $this->isPastDate('gateway', $gateway->id, $gateway->tags[$this->gatewaySilencedTag]);
+            return !$this->isPastDate('gateway', $gateway->id, $gateway->tags[$this->gatewaySilencedTag]);
         }
 
         return false;

@@ -204,16 +204,22 @@ Two commands to test mails and SMS integration.
 * `app:mail:test` (Send test e-mail)
 * `app:sms:test` (Send test SMS)
 
-# Slutbrugervejledning :denmark:
+## Slutbrugervejledning (:denmark:)
 
-Applikationers og Gateways' alarmering slås til ved at markere Status som værende *I drift* eller *Projekt*, hvorimod *-*, *Prototype* eller *Andet* ikke forårsager alarmer. Desuden respekteres *Slutdato*.
+Applikationers og Gateways' alarmering slås til ved at markere Status som værende *I drift* eller *Projekt*, hvorimod
+*-*, *Prototype* eller *Andet* ikke forårsager alarmer. Desuden respekteres *Slutdato*.
 
-## Ingen alarmer frem til en dato
+### Ingen alarmer frem til en dato
+
 Hvis en Enhed, Applikation eller Gateway ikke skal afgive alarmer frem til en bestemt dato:
 
-1. For Applikationer og disses Enheder: I OS2IOTs brugerinterface klikker man *Rediger* og vælger *Tilføj metadatarække*. Der skal så angives en metadatarække med *Nøgle*: `silenced_until` og *Værdi* på formen `31-12-25T00:00:00`.
+1. For Applikationer og disses Enheder: I OS2IOTs brugerinterface klikker man *Rediger* og vælger *Tilføj
+   metadatarække*. Der skal så angives en metadatarække med *Nøgle*: `silenced_until` og *Værdi* på formen
+   `31-12-25T00:00:00`.
 2. For Gateways skal man under *Gateway tags* indtaste på formen `{"silenced_until":"31-12-25T00:00:00"}`.
 
-## Én enhed med særlig ansvarlig
-Hvis enhederne i en Applikation ikke har samme ejer/ansvarlige, så kan man for en *Enhed* klikke *Rediger* og vælge *Tilføj metadatarække*. *Nøgle* skal være `email` og *Værdi* skal være på formen `user@domain.example`.
+### Én enhed med særlig ansvarlig
+
+Hvis enhederne i en Applikation ikke har samme ejer/ansvarlige, så kan man for en `Enhed` klikke `Rediger` og vælge
+`Tilføj metadatarække`. `Nøgle` skal være `email` og `Værdi` skal være på formen `user@domain.example`.
 Der kan for SMS-varsling tilsvarende sættes nøglen `phone` med værdien på formen `+4570241207`.
