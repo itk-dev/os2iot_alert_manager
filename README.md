@@ -204,7 +204,7 @@ Two commands to test mails and SMS integration.
 * `app:mail:test` (Send test e-mail)
 * `app:sms:test` (Send test SMS)
 
-## Slutbrugervejledning :denmark:
+## Slutbrugervejledning (:denmark:)
 
 Applikationers og Gateways' alarmering slås til ved at markere Status som værende *I drift* eller *Projekt*, hvorimod
 *-*, *Prototype* eller *Andet* ikke forårsager alarmer. Desuden respekteres *Slutdato*.
